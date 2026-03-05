@@ -330,6 +330,11 @@ streamlit run streamlit_app/app.py
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v1.3.1 | 2026-03-05 | Fix password storage for PDF credentials (store in session state) |
+| v1.3.0 | 2026-03-05 | Add PDF download for Class Credentials with Chinese and emoji support |
+| v1.2.3 | 2026-03-05 | Fix Excel download 404 error with BytesIO |
+| v1.2.2 | 2026-03-05 | Fix duplicate widget ID errors |
+| v1.2.1 | 2026-03-05 | Fix indentation errors |
 | v1.2.0 | 2026-03-05 | Simplify Teacher Dashboard UX, combined class creation with student import |
 | v1.1.0 | 2026-03-05 | Add single emoji graphical passwords and batch import |
 | v1.0.4 | 2026-03-05 | Improve delete class confirmation flow |
