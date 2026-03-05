@@ -610,3 +610,50 @@ def batch_create_students(names: list, class_id: str) -> list:
             })
 
     return results
+
+
+def regenerate_class_passwords(class_id: str) -> list:
+    """Regenerate graphical passwords for all students in a class.
+
+    Args:
+        class_id: The class ID
+
+    Returns:
+        List of dicts with user_id, username, full_name, password, and status
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # Get all students in the class
+    cursor.execute(
+        "SELECT id, username, full_name FROM users WHERE class_id = ? AND role = 'student'",
+        (class_id,)
+    )
+    students = cursor.fetchall()
+    
+    results = []
+    for student in students:
+        user_id = student[0]
+        username = student[1]
+        full_name = student[2] or username
+        
+        # Generate new password
+        new_password = generate_graphical_password(1)
+        
+        # Update password in database
+        cursor.execute(
+            "UPDATE users SET password_hash = ? WHERE id = ?",
+            (hash_password(new_password), user_id)
+        )
+        
+        results.append({
+            "user_id": user_id,
+            "username": username,
+            "full_name": full_name,
+            "password": new_password,
+            "status": "success"
+        })
+    
+    conn.commit()
+    conn.close()
+    return results

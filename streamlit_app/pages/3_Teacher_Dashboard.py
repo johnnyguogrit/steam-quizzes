@@ -10,7 +10,7 @@ from database import (
     get_user, create_user, get_classes_by_teacher, get_students_by_class,
     get_class_statistics, export_class_data, create_class, get_all_users,
     delete_user, delete_class, get_user_attempts, generate_graphical_password,
-    batch_create_students, generate_username_from_name, get_connection,
+    batch_create_students, generate_username_from_name, get_connection, regenerate_class_passwords
     get_user_by_username
 )
 from auth import require_teacher, logout_button, get_current_user
@@ -563,7 +563,23 @@ with tab2:
                         mime="text/csv",
                         key=f"download_csv_{cls['id']}"
                     )
-
+                # Regenerate passwords section
+                st.markdown("---")
+                st.markdown("#### Password Management")
+                if any(st.session_state.student_passwords.get(s["id"]) is None for s in students):
+                    st.warning("⚠️ Some student passwords are not available. Click below to regenerate.")
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("🔄 Regenerate All Passwords", key=f"regen_{cls['id']}", type="secondary"):
+                        with st.spinner("Regenerating passwords..."):
+                            results = regenerate_class_passwords(str(cls["id"]))
+                            # Store new passwords in session state
+                            for r in results:
+                                st.session_state.student_passwords[r["user_id"]] = r["password"]
+                            st.success(f"✅ Regenerated {len(results)} student passwords! Please download the PDF again.")
+                            st.rerun()
+                with col2:
+                    st.markdown("**Note:** This will generate new random emoji passwords for all students. Old passwords will no longer work!")
                 # Student table with actions - show password if available
                 for student in students:
                     pwd = st.session_state.student_passwords.get(student["id"], "•••")
