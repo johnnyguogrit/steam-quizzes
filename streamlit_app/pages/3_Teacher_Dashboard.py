@@ -10,7 +10,8 @@ from database import (
     get_user, create_user, get_classes_by_teacher, get_students_by_class,
     get_class_statistics, export_class_data, create_class, get_all_users,
     delete_user, delete_class, get_user_attempts, generate_graphical_password,
-    batch_create_students, generate_username_from_name, get_connection
+    batch_create_students, generate_username_from_name, get_connection,
+    get_user_by_username
 )
 from auth import require_teacher, logout_button, get_current_user
 
@@ -22,6 +23,10 @@ st.set_page_config(
 )
 
 require_teacher()
+
+# Initialize session state for storing student passwords
+if 'student_passwords' not in st.session_state:
+    st.session_state.student_passwords = {}  # {user_id: password}
 
 # Sidebar
 with st.sidebar:
@@ -37,8 +42,14 @@ with st.sidebar:
         st.switch_page("pages/1_Landing.py")
 
 
-def create_credentials_pdf(class_name, students):
-    """Create a PDF with class credentials, supporting Chinese and emoji."""
+def create_credentials_pdf(class_name, students, password_map=None):
+    """Create a PDF with class credentials, supporting Chinese and emoji.
+
+    Args:
+        class_name: Name of the class
+        students: List of student dictionaries
+        password_map: Optional dict mapping user_id to password
+    """
     from reportlab.lib.pagesizes import A4
     from reportlab.lib import colors
     from reportlab.lib.units import mm
@@ -137,7 +148,13 @@ def create_credentials_pdf(class_name, students):
     for i, student in enumerate(students, 1):
         name = student.get("full_name", student["username"])
         username = student["username"]
-        password = student.get("password", "N/A")
+
+        # Get password from student dict or from password map
+        password = student.get("password")
+        if password is None and password_map:
+            password = password_map.get(student["id"])
+        if password is None:
+            password = "N/A"
 
         # For emoji, we need to handle specially
         # If emoji font is not available, show as text
@@ -259,6 +276,31 @@ def create_credentials_pdf(class_name, students):
     doc.build(elements)
     buffer.seek(0)
     return buffer.getvalue()
+
+
+def create_user_with_password_storage(username, password, role, full_name, class_id):
+    """Create a user and store the password in session state."""
+    success = create_user(username, password, role, full_name, class_id)
+    if success:
+        # Get the newly created user ID
+        user = get_user_by_username(username)
+        if user:
+            st.session_state.student_passwords[user["id"]] = password
+    return success
+
+
+def batch_create_students_with_password_storage(names, class_id):
+    """Batch create students and store passwords in session state."""
+    results = batch_create_students(names, class_id)
+
+    # Store passwords for successful creations
+    for r in results:
+        if r["status"] == "success":
+            user = get_user_by_username(r["username"])
+            if user:
+                st.session_state.student_passwords[user["id"]] = r["password"]
+
+    return results
 
 
 # Custom CSS
@@ -397,6 +439,12 @@ with tab2:
                     if st.button("✅ Confirm Delete", key=f"ok_{cls['id']}", type="primary"):
                         try:
                             if delete_class(cls["id"]):
+                                # Clean up passwords from session state
+                                students = get_students_by_class(str(cls["id"]))
+                                for s in students:
+                                    if s["id"] in st.session_state.student_passwords:
+                                        del st.session_state.student_passwords[s["id"]]
+
                                 st.success(f"Class '{cls['name']}' deleted successfully!")
                                 if confirm_key in st.session_state:
                                     del st.session_state[confirm_key]
@@ -435,7 +483,7 @@ with tab2:
                             username = generate_username_from_name(full_name, list(existing))
                             password = generate_graphical_password(1)
 
-                            if create_user(username, password, "student", full_name, str(cls["id"])):
+                            if create_user_with_password_storage(username, password, "student", full_name, str(cls["id"])):
                                 st.success(f"✅ Student '{full_name}' added! Username: {username}, Password: {password}")
                                 st.rerun()
                             else:
@@ -464,7 +512,7 @@ with tab2:
                             names.extend(line_names)
 
                         if names:
-                            results = batch_create_students(names, str(cls["id"]))
+                            results = batch_create_students_with_password_storage(names, str(cls["id"]))
                             success_count = sum(1 for r in results if r["status"] == "success")
 
                             st.markdown(f"### Results: {success_count}/{len(results)} students created")
@@ -489,7 +537,8 @@ with tab2:
 
                 with col1:
                     # PDF download with Chinese and emoji support
-                    pdf_data = create_credentials_pdf(cls['name'], students)
+                    # Use session state passwords
+                    pdf_data = create_credentials_pdf(cls['name'], students, st.session_state.student_passwords)
                     st.download_button(
                         label="📄 Download Class Credentials (PDF)",
                         data=pdf_data,
@@ -499,11 +548,11 @@ with tab2:
                     )
 
                 with col2:
-                    # CSV download (fallback, may not display emoji correctly)
+                    # CSV download with passwords from session state
                     creds_data = [{
                         "姓名": s.get("full_name", s["username"]),
                         "用户名": s["username"],
-                        "密码": s.get("password", "N/A")
+                        "密码": st.session_state.student_passwords.get(s["id"], "N/A")
                     } for s in students]
                     creds_df = pd.DataFrame(creds_data)
                     creds_csv = creds_df.to_csv(index=False).encode('utf-8-sig')  # UTF-8 with BOM for Excel compatibility
@@ -515,13 +564,15 @@ with tab2:
                         key=f"download_csv_{cls['id']}"
                     )
 
-                # Student table with actions
+                # Student table with actions - show password if available
                 for student in students:
+                    pwd = st.session_state.student_passwords.get(student["id"], "•••")
                     with st.expander(f"👤 {student.get('full_name', student['username'])}"):
                         col1, col2, col3 = st.columns(3)
 
                         with col1:
                             st.markdown(f"**Username:** `{student['username']}`")
+                            st.markdown(f"**Password:** `{pwd}`")
                             st.markdown(f"**Attempts:** {student.get('total_attempts', 0)}")
                             if student.get("avg_score"):
                                 st.markdown(f"**Avg Score:** {student.get('avg_score', 0) * 100:.1f}%")
@@ -534,6 +585,9 @@ with tab2:
                         with col3:
                             if st.button("🗑 Remove", key=f"remove_{student['id']}", type="secondary"):
                                 if delete_user(student["id"]):
+                                    # Clean up password from session state
+                                    if student["id"] in st.session_state.student_passwords:
+                                        del st.session_state.student_passwords[student["id"]]
                                     st.success("Student removed!")
                                     st.rerun()
                                 else:
@@ -585,7 +639,7 @@ with tab3:
                     names.extend(line_names)
 
                 if names:
-                    results = batch_create_students(names, str(class_id))
+                    results = batch_create_students_with_password_storage(names, str(class_id))
                     success_count = sum(1 for r in results if r["status"] == "success")
 
                     st.markdown(f"### 📊 Results: {success_count}/{len(results)} students added")
