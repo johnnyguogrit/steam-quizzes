@@ -135,7 +135,7 @@ with tab2:
     else:
         # Select class to view/manage
         class_options = {c["name"]: c for c in classes}
-        selected_class_name = st.selectbox("Select Class", list(class_options.keys()))
+        selected_class_name = st.selectbox("Select Class", list(class_options.keys()), key="tab2_select_class")
 
         if selected_class_name:
             cls = class_options[selected_class_name]
@@ -200,7 +200,7 @@ with tab2:
                 existing = set(row[0] for row in cursor.fetchall())
                 conn.close()
 
-                full_name = st.text_input("Student Name")
+                full_name = st.text_input("Student Name", key=f"tab2_student_name_{cls['id']}")
                 col1, col2 = st.columns(2)
 
                 with col1:
@@ -315,8 +315,8 @@ with tab3:
 
         with col1:
             st.markdown("#### Step 1: Create Class")
-            class_name = st.text_input("Class Name*", placeholder="e.g., Grade 1 - Class A")
-            grade_level = st.selectbox("Grade Level*", ["G1", "G2", "G3", "G4", "G5"])
+            class_name = st.text_input("Class Name*", placeholder="e.g., Grade 1 - Class A", key="tab3_class_name")
+            grade_level = st.selectbox("Grade Level*", ["G1", "G2", "G3", "G4", "G5"], key="tab3_grade_level")
 
         with col2:
             st.markdown("#### Step 2: Add Students (Optional)")
@@ -324,7 +324,8 @@ with tab3:
             names_input = st.text_area(
                 "Paste student names (one per line or comma-separated)",
                 placeholder="张三\n李四\n王五\n\nOr: 张三, 李四, 王五",
-                height=150
+                height=150,
+                key="tab3_names_input"
             )
             st.markdown("* Single emoji password will be auto-generated (e.g., 🌟, 🎮, 🍎)")
 
@@ -363,7 +364,7 @@ with tab3:
                 st.info("👌 Class created without students. You can add students later in the 'Classes' tab.")
 
             st.markdown("---")
-            if st.button("🔄 Create Another", use_container_width=True):
+            if st.button("🔄 Create Another", use_container_width=True, key="tab3_create_another"):
                 st.rerun()
 
 with tab4:
@@ -374,7 +375,7 @@ with tab4:
     if classes:
         # Select class to export
         class_options = {c["name"]: str(c["id"]) for c in classes}
-        selected_class_name = st.selectbox("Select Class", list(class_options.keys()))
+        selected_class_name = st.selectbox("Select Class", list(class_options.keys()), key="tab4_select_class")
 
         if selected_class_name:
             class_id = class_options[selected_class_name]
@@ -397,7 +398,8 @@ with tab4:
                         label="📥 Download as CSV",
                         data=csv,
                         file_name=f"{selected_class_name}_quiz_data.csv",
-                        mime="text/csv"
+                        mime="text/csv",
+                        key="tab4_download_csv"
                     )
 
                 with col2:
@@ -411,7 +413,8 @@ with tab4:
                             label="📥 Download as Excel",
                             data=f,
                             file_name=f"{selected_class_name}_quiz_data.xlsx",
-                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            key="tab4_download_excel"
                         )
             else:
                 st.info("No quiz data available for this class yet.")
