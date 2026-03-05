@@ -5,6 +5,7 @@ Manage classes, view student progress, and export data.
 
 import streamlit as st
 import pandas as pd
+import io
 from database import (
     get_user, create_user, get_classes_by_teacher, get_students_by_class,
     get_class_statistics, export_class_data, create_class, get_all_users,
@@ -258,23 +259,22 @@ with tab2:
             if students:
                 st.markdown("#### Student List")
 
-                # Download credentials button
+                # Download credentials
                 creds_data = [{
                     "姓名": s.get("full_name", s["username"]),
                     "用户名": s["username"],
-                    "密码": s.get("password", "N/A")  # Note: password_hash is stored, not plain password
+                    "密码": s.get("password", "N/A")
                 } for s in students]
+                creds_df = pd.DataFrame(creds_data)
+                creds_csv = creds_df.to_csv(index=False).encode('utf-8')
 
-                if st.button("📥 Download Class Credentials", key=f"download_creds_{cls['id']}"):
-                    df = pd.DataFrame(creds_data)
-                    csv = df.to_csv(index=False)
-                    st.download_button(
-                        "Download CSV",
-                        csv,
-                        f"{cls['name']}_credentials.csv",
-                        mime="text/csv",
-                        key=f"dl_{cls['id']}"
-                    )
+                st.download_button(
+                    label="📥 Download Class Credentials",
+                    data=creds_csv,
+                    file_name=f"{cls['name']}_credentials.csv",
+                    mime="text/csv",
+                    key=f"download_creds_{cls['id']}"
+                )
 
                 # Student table with actions
                 for student in students:
@@ -393,7 +393,7 @@ with tab4:
                 col1, col2 = st.columns(2)
 
                 with col1:
-                    csv = df.to_csv(index=False)
+                    csv = df.to_csv(index=False).encode('utf-8')
                     st.download_button(
                         label="📥 Download as CSV",
                         data=csv,
@@ -403,19 +403,19 @@ with tab4:
                     )
 
                 with col2:
-                    # Convert to Excel
-                    output = pd.ExcelWriter(f"{selected_class_name}_quiz_data.xlsx", engine='openpyxl')
-                    df.to_excel(output, index=False, sheet_name='Quiz Data')
-                    output.close()
+                    # Convert to Excel using BytesIO
+                    buffer = io.BytesIO()
+                    with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+                        df.to_excel(writer, index=False, sheet_name='Quiz Data')
+                    buffer.seek(0)
 
-                    with open(f"{selected_class_name}_quiz_data.xlsx", 'rb') as f:
-                        st.download_button(
-                            label="📥 Download as Excel",
-                            data=f,
-                            file_name=f"{selected_class_name}_quiz_data.xlsx",
-                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                            key="tab4_download_excel"
-                        )
+                    st.download_button(
+                        label="📥 Download as Excel",
+                        data=buffer,
+                        file_name=f"{selected_class_name}_quiz_data.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        key="tab4_download_excel"
+                    )
             else:
                 st.info("No quiz data available for this class yet.")
     else:
