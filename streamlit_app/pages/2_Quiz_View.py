@@ -61,9 +61,9 @@ st.markdown(f"""
 
 # Get the quiz file path
 # Determine the base directory - works both locally and on Streamlit Cloud
+# Current file is in streamlit_app/pages/, need to go up two levels to repo root
 current_dir = os.path.dirname(os.path.abspath(__file__))
-# Navigate to parent directory (streamlit_app) then to quizzes
-base_dir = os.path.dirname(current_dir)
+base_dir = os.path.dirname(os.path.dirname(current_dir))
 quiz_path = os.path.join(base_dir, quiz['path'])
 
 # Check if quiz file exists
