@@ -8,7 +8,8 @@ import pandas as pd
 from database import (
     get_user, create_user, get_classes_by_teacher, get_students_by_class,
     get_class_statistics, export_class_data, create_class, get_all_users,
-    delete_user, delete_class, get_user_attempts
+    delete_user, delete_class, get_user_attempts, generate_graphical_password,
+    batch_create_students
 )
 from auth import require_teacher, logout_button, get_current_user
 
@@ -55,6 +56,27 @@ st.markdown("""
         border-left: 4px solid #ffc107;
         border-radius: 5px;
         margin: 10px 0;
+    }
+    .password-preview {
+        font-size: 1.5rem;
+        text-align: center;
+        padding: 15px;
+        background: #f0f8ff;
+        border-radius: 10px;
+        margin: 10px 0;
+        letter-spacing: 5px;
+    }
+    .success-row {
+        background: #d4edda;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 5px 0;
+    }
+    .error-row {
+        background: #f8d7da;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 5px 0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -171,7 +193,7 @@ with tab2:
                 if students:
                     st.markdown("##### Students:")
 
-                    # Student table
+                    # Student table with passwords
                     student_data = []
                     for s in students:
                         student_data.append({
@@ -212,7 +234,7 @@ with tab2:
 with tab3:
     st.header("➕ Create")
 
-    create_tab1, create_tab2 = st.tabs(["📚 New Class", "👨‍🎓 New Student"])
+    create_tab1, create_tab2, create_tab3 = st.tabs(["📚 New Class", "👨‍🎓 Single Student", "📋 Batch Import"])
 
     with create_tab1:
         st.subheader("Create a New Class")
@@ -230,30 +252,168 @@ with tab3:
                 st.rerun()
 
     with create_tab2:
-        st.subheader("Create Student Account")
+        st.subheader("Create Single Student Account")
+        st.info("💡 A graphical password will be auto-generated (e.g., 🌟)")
 
         # Select class
         classes = get_classes_by_teacher(teacher["id"])
 
         if classes:
             with st.form("create_student_form"):
-                username = st.text_input("Username*", placeholder="Student's username")
-                password = st.text_input("Password*", type="password")
-                full_name = st.text_input("Full Name", placeholder="Student's full name")
+                full_name = st.text_input("Full Name*", placeholder="Student's full name")
+
+                # Show password preview option
+                show_preview = st.checkbox("Preview password", value=True)
 
                 class_options = {f"{c['name']} ({c.get('grade_level', 'N/A')})": str(c["id"]) for c in classes}
                 selected_class = st.selectbox("Class*", list(class_options.keys()))
 
                 submitted = st.form_submit_button("Create Student", type="primary")
 
-                if submitted and username and password:
+                if submitted and full_name:
+                    # Generate username and password
+                    from database import generate_username_from_name
+
                     class_id = class_options[selected_class]
+
+                    # Get existing usernames
+                    conn = __import__('database').get_connection()
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT username FROM users")
+                    existing = set(row[0] for row in cursor.fetchall())
+                    conn.close()
+
+                    username = generate_username_from_name(full_name, list(existing))
+                    password = generate_graphical_password(4)
+
                     if create_user(username, password, "student", full_name, class_id):
-                        st.success(f"Student '{full_name or username}' created successfully! 🎉")
+                        st.success(f"Student '{full_name}' created successfully! 🎉")
+
+                        # Show credentials
+                        if show_preview:
+                            st.markdown(f"""
+                                <div class="password-preview">
+                                    <strong>Username:</strong> {username}<br>
+                                    <strong>Password:</strong> {password}
+                                </div>
+                            """, unsafe_allow_html=True)
+
                         st.info(f"Share these credentials with the student:\n- Username: {username}\n- Password: {password}")
                         st.balloons()
                     else:
-                        st.error("Username already exists. Please choose a different username.")
+                        st.error("Failed to create student. Please try again.")
+        else:
+            st.warning("Please create a class first before adding students.")
+
+    with create_tab3:
+        st.subheader("📋 Batch Import Students")
+        st.info("💡 Paste student names from Excel (one name per line or separated by commas)")
+        st.markdown("""
+        **Instructions:**
+        1. Select the target class
+        2. Paste student names (from Excel column or type manually)
+        3. Click "Generate & Create Students"
+        4. Download the credentials list to share with students
+
+        Each student will get:
+        - Auto-generated username (based on their name)
+        - Graphical password (e.g., 🌟)
+        """)
+
+        # Select class
+        classes = get_classes_by_teacher(teacher["id"])
+
+        if classes:
+            class_options = {f"{c['name']} ({c.get('grade_level', 'N/A')})": str(c["id"]) for c in classes}
+            selected_class = st.selectbox("Select Class*", list(class_options.keys()))
+            class_id = class_options[selected_class]
+
+            # Input area for student names
+            names_input = st.text_area(
+                "Paste Student Names",
+                placeholder="张三\n李四\n王五\n\nOr separated by commas:\n张三, 李四, 王五",
+                height=150,
+                help="Enter one name per line, or separate with commas"
+            )
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                if st.button("✨ Generate & Create Students", type="primary", use_container_width=True):
+                    if names_input.strip():
+                        # Parse names - handle both newlines and commas
+                        names = []
+                        for line in names_input.strip().split('\n'):
+                            # Split by comma and strip whitespace
+                            line_names = [n.strip() for n in line.split(',') if n.strip()]
+                            names.extend(line_names)
+
+                        if names:
+                            # Batch create
+                            results = batch_create_students(names, class_id)
+
+                            # Show results
+                            success_count = sum(1 for r in results if r["status"] == "success")
+                            fail_count = len(results) - success_count
+
+                            st.markdown(f"### Results: {success_count} created, {fail_count} failed")
+
+                            # Show each result
+                            for r in results:
+                                if r["status"] == "success":
+                                    st.markdown(f"""
+                                        <div class="success-row">
+                                            ✅ <strong>{r['full_name']}</strong><br>
+                                            Username: <code>{r['username']}</code> | Password: <code>{r['password']}</code>
+                                        </div>
+                                    """, unsafe_allow_html=True)
+                                else:
+                                    st.markdown(f"""
+                                        <div class="error-row">
+                                            ❌ <strong>{r['full_name']}</strong> - Failed to create
+                                        </div>
+                                    """, unsafe_allow_html=True)
+
+                            if success_count > 0:
+                                st.balloons()
+
+                                # Create downloadable credentials
+                                creds_df = pd.DataFrame([
+                                    {"姓名": r["full_name"], "用户名": r["username"], "密码": r["password"]}
+                                    for r in results if r["status"] == "success"
+                                ])
+
+                                csv = creds_df.to_csv(index=False)
+                                st.download_button(
+                                    "📥 Download Credentials List",
+                                    csv,
+                                    f"students_credentials_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                                    mime="text/csv"
+                                )
+                        else:
+                            st.warning("No valid names found. Please check your input.")
+                    else:
+                        st.warning("Please enter student names first.")
+
+            with col2:
+                st.markdown("**Password Examples:**")
+                st.markdown("""
+                    <div class="password-preview">
+                        🌟
+                    </div>
+                    <div class="password-preview">
+                        🎮
+                    </div>
+                    <div class="password-preview">
+                        🍎
+                    </div>
+                """, unsafe_allow_html=True)
+
+                st.markdown("**Tips:**")
+                st.markdown("- Use graphical passwords - easy to remember!")
+                st.markdown("- Each password is 1 random emoji")
+                st.markdown("- Download the credentials list after creating")
+
         else:
             st.warning("Please create a class first before adding students.")
 

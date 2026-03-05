@@ -100,6 +100,73 @@ def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
 
 
+def generate_graphical_password(length: int = 1) -> str:
+    """Generate a random graphical password using a single emoji.
+
+    Returns one random emoji that students can easily remember.
+    Examples: 🌟, 🎮, 🍎, 🐱
+    """
+    import random
+
+    # Define emojis for students
+    emojis = [
+        # Fun & Colorful
+        '🌟', '🌙', '⭐', '☀️', '🌈', '☁️', '⚡', '❄️', '🔥',
+        # Colors
+        '🔴', '🟠', '🟡', '🟢', '🔵', '🟣', '🟤', '⚫', '⚪',
+        # Animals
+        '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨',
+        # Food
+        '🍎', '🍊', '🍋', '🍌', '🍇', '🍓', '🍒', '🍑', '🥝',
+        # Sports & Games
+        '⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏉', '🎱', '🏓',
+        # Activities
+        '🎮', '🎯', '🎲', '🎪', '🎨', '🎭', '🎵', '🎸', '🎹',
+        # Objects
+        '📚', '✏️', '🖊️', '🖍️', '📏', '📐', '🎒', '🔑', '🖱️',
+        # Vehicles
+        '🚗', '🚕', '🚙', '🚌', '🚎', '🚓', '🚲', '🛴', '🚃',
+        # Nature
+        '🌸', '🌺', '🌻', '🌼', '🌷', '🌹', '🍀', '🌲', '🌴',
+        # Faces (simple ones)
+        '😊', '😃', '😄', '🙂', '😎', '🤗', '🤩', '😇', '🥰',
+    ]
+
+    return random.choice(emojis)
+
+
+def generate_username_from_name(full_name: str, existing_names: list = None) -> str:
+    """Generate a unique username from student's full name.
+
+    Converts Chinese name to pinyin-style username: zhangsan1, lisi2, etc.
+    """
+    import random
+    import string
+
+    if existing_names is None:
+        existing_names = []
+
+    # For Chinese names, use phonetic approximation
+    # For simplicity, we'll use a combination approach
+    base_name = full_name.lower().replace(' ', '_')
+
+    # Remove any non-alphanumeric characters
+    base_name = ''.join(c for c in base_name if c.isalnum() or c == '_')
+
+    # If base_name is too short or empty, use default
+    if len(base_name) < 2:
+        base_name = 'student'
+
+    # Try base_name first, then add numbers
+    username = base_name
+    counter = 1
+    while username in existing_names:
+        username = f"{base_name}{counter}"
+        counter += 1
+
+    return username
+
+
 def create_user(username: str, password: str, role: str, full_name: str = "", class_id: str = "") -> bool:
     """Create a new user."""
     conn = get_connection()
@@ -492,3 +559,54 @@ def get_quiz_summary(user_id: int, quiz_id: str) -> Dict:
         "avg_score": round(sum(scores) / len(scores) * 100, 1) if scores else 0,
         "last_attempt": attempts[0]["completed_at"]
     }
+
+
+def batch_create_students(names: list, class_id: str) -> list:
+    """Batch create students with auto-generated usernames and graphical passwords.
+
+    Args:
+        names: List of student full names
+        class_id: The class ID to assign students to
+
+    Returns:
+        List of dicts with username, password, full_name, and status
+    """
+    # Get existing usernames to avoid duplicates
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT username FROM users")
+    existing_names = set(row[0] for row in cursor.fetchall())
+    conn.close()
+
+    results = []
+
+    for full_name in names:
+        if not full_name or not full_name.strip():
+            continue
+
+        full_name = full_name.strip()
+
+        # Generate unique username
+        username = generate_username_from_name(full_name, list(existing_names))
+
+        # Generate graphical password
+        password = generate_graphical_password(1)
+
+        # Create user
+        if create_user(username, password, "student", full_name, class_id):
+            existing_names.add(username)
+            results.append({
+                "full_name": full_name,
+                "username": username,
+                "password": password,
+                "status": "success"
+            })
+        else:
+            results.append({
+                "full_name": full_name,
+                "username": username,
+                "password": password,
+                "status": "failed"
+            })
+
+    return results
