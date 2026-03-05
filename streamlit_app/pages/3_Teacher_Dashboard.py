@@ -36,6 +36,231 @@ with st.sidebar:
     if st.button("🎯 Browse Quizzes", use_container_width=True):
         st.switch_page("pages/1_Landing.py")
 
+
+def create_credentials_pdf(class_name, students):
+    """Create a PDF with class credentials, supporting Chinese and emoji."""
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.lib.units import mm
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4,
+                            leftMargin=20*mm, rightMargin=20*mm,
+                            topMargin=20*mm, bottomMargin=20*mm)
+
+    # Container for the PDF elements
+    elements = []
+
+    # Try to register fonts that support Chinese and emoji
+    chinese_font_registered = False
+    emoji_font_registered = False
+
+    # Common Chinese fonts on different systems
+    chinese_fonts = [
+        # Linux/Streamlit Cloud
+        '/usr/share/fonts/truetype/wqy/wqy-microhei.ttc',
+        '/usr/share/fonts/truetype/arphic/uming.ttc',
+        '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
+        '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+        # Fallback - use built-in fonts
+        'Helvetica',
+    ]
+
+    # Emoji-supporting fonts
+    emoji_fonts = [
+        '/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf',
+        '/usr/share/fonts/truetype/emoji/AppleColorEmoji.ttf',
+        'Segoe UI Emoji',
+        'Apple Color Emoji',
+        'Noto Color Emoji',
+    ]
+
+    # Register Chinese font
+    for font_path in chinese_fonts:
+        try:
+            if font_path == 'Helvetica':
+                # Use built-in
+                pdfmetrics.registerFont(TTFont('ChineseFont', 'Helvetica'))
+            else:
+                pdfmetrics.registerFont(TTFont('ChineseFont', font_path))
+            chinese_font_registered = True
+            break
+        except:
+            continue
+
+    # Register emoji font (optional - if not available, emojis might not render)
+    for font_path in emoji_fonts:
+        try:
+            if font_path in ['Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji']:
+                # These are system font names, skip for PDF
+                continue
+            pdfmetrics.registerFont(TTFont('EmojiFont', font_path))
+            emoji_font_registered = True
+            break
+        except:
+            continue
+
+    # Define styles
+    styles = getSampleStyleSheet()
+
+    # Title style
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parentStyle=styles['Heading1'],
+        fontName='ChineseFont' if chinese_font_registered else 'Helvetica-Bold',
+        fontSize=20,
+        alignment=1,  # Center
+        spaceAfter=12*mm
+    )
+
+    # Subtitle style
+    subtitle_style = ParagraphStyle(
+        'CustomSubtitle',
+        parentStyle=styles['Normal'],
+        fontName='ChineseFont' if chinese_font_registered else 'Helvetica',
+        fontSize=10,
+        alignment=1,
+        spaceAfter=20*mm
+    )
+
+    # Add title
+    elements.append(Paragraph(f"{class_name}", title_style))
+    elements.append(Paragraph("班级学生登录凭证 / Student Login Credentials", subtitle_style))
+
+    # Prepare table data
+    table_data = [['序号', '姓名', '用户名', '密码']]
+
+    for i, student in enumerate(students, 1):
+        name = student.get("full_name", student["username"])
+        username = student["username"]
+        password = student.get("password", "N/A")
+
+        # For emoji, we need to handle specially
+        # If emoji font is not available, show as text
+        if not emoji_font_registered and password and len(password) == 1 and ord(password[0]) > 127:
+            # It's an emoji and we don't have emoji font
+            # Show both emoji and description
+            emoji_descriptions = {
+                '🌟': 'Star (star)',
+                '🌙': 'Moon (moon)',
+                '⭐': 'Star (star)',
+                '☀️': 'Sun (sun)',
+                '🌈': 'Rainbow (rainbow)',
+                '☁️': 'Cloud (cloud)',
+                '⚡': 'Lightning (lightning)',
+                '❄️': 'Snowflake (snowflake)',
+                '🔥': 'Fire (fire)',
+                '🔴': 'Red Circle (red)',
+                '🟠': 'Orange Circle (orange)',
+                '🟡': 'Yellow Circle (yellow)',
+                '🟢': 'Green Circle (green)',
+                '🔵': 'Blue Circle (blue)',
+                '🟣': 'Purple Circle (purple)',
+                '🟤': 'Brown Circle (brown)',
+                '⚫': 'Black Circle (black)',
+                '⚪': 'White Circle (white)',
+                '🐶': 'Dog (dog)',
+                '🐱': 'Cat (cat)',
+                '🐭': 'Mouse (mouse)',
+                '🐹': 'Hamster (hamster)',
+                '🐰': 'Rabbit (rabbit)',
+                '🦊': 'Fox (fox)',
+                '🐻': 'Bear (bear)',
+                '🐼': 'Panda (panda)',
+                '🐨': 'Koala (koala)',
+                '🍎': 'Apple (apple)',
+                '🍊': 'Tangerine (orange)',
+                '🍋': 'Lemon (lemon)',
+                '🍌': 'Banana (banana)',
+                '🍇': 'Grape (grape)',
+                '🍓': 'Strawberry (strawberry)',
+                '🍒': 'Cherry (cherry)',
+                '🍑': 'Peach (peach)',
+                '🥝': 'Kiwi (kiwi)',
+                '⚽': 'Soccer Ball (soccer)',
+                '🏀': 'Basketball (basketball)',
+                '🏈': 'Football (football)',
+                '⚾': 'Baseball (baseball)',
+                '🎾': 'Tennis (tennis)',
+                '🎮': 'Game Controller (game)',
+                '🎯': 'Bullseye (target)',
+                '🎲': 'Dice (dice)',
+                '🎪': 'Circus (circus)',
+                '📚': 'Books (books)',
+                '✏️': 'Pencil (pencil)',
+                '🖊️': 'Pen (pen)',
+                '🖍️': 'Crayon (crayon)',
+                '📏': 'Ruler (ruler)',
+                '🎒': 'Backpack (backpack)',
+                '🔑': 'Key (key)',
+                '🚗': 'Car (car)',
+                '🚌': 'Bus (bus)',
+                '🌸': 'Cherry Blossom (flower)',
+                '🌺': 'Hibiscus (flower)',
+                '🌻': 'Sunflower (sunflower)',
+                '🌼': 'Flower (flower)',
+                '🌷': 'Tulip (tulip)',
+                '🌹': 'Rose (rose)',
+                '🍀': 'Clover (clover)',
+                '🌲': 'Tree (tree)',
+                '🌴': 'Palm Tree (palm)',
+                '😊': 'Smile (smile)',
+                '😃': 'Happy (happy)',
+                '😄': 'Grin (grin)',
+                '🙂': 'Slight Smile (slight smile)',
+                '😎': 'Cool (cool)',
+                '🤗': 'Hug (hug)',
+                '🤩': 'Star Eyes (amazing)',
+                '😇': 'Angel (angel)',
+                '🥰': 'Love (love)',
+            }
+            password_display = emoji_descriptions.get(password, f"{password} (emoji)")
+        else:
+            password_display = password
+
+        table_data.append([str(i), name, username, password_display])
+
+    # Create table
+    table = Table(table_data, colWidths=[15*mm, 40*mm, 40*mm, 50*mm])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'ChineseFont' if chinese_font_registered else 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12*mm),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('FONTNAME', (0, 1), (-1, -1), 'ChineseFont' if chinese_font_registered else 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 10),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
+        ('TOPPADDING', (0, 1), (-1, -1), 8*mm),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 8*mm),
+    ]))
+
+    elements.append(table)
+
+    # Add footer
+    footer_style = ParagraphStyle(
+        'Footer',
+        parentStyle=styles['Normal'],
+        fontName='ChineseFont' if chinese_font_registered else 'Helvetica',
+        fontSize=8,
+        alignment=1,
+        spaceBefore=15*mm
+    )
+    elements.append(Paragraph("STEAM Quiz Platform | Spring 2026", footer_style))
+
+    # Build PDF
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer.getvalue()
+
+
 # Custom CSS
 st.markdown("""
 <style>
@@ -259,22 +484,36 @@ with tab2:
             if students:
                 st.markdown("#### Student List")
 
-                # Download credentials
-                creds_data = [{
-                    "姓名": s.get("full_name", s["username"]),
-                    "用户名": s["username"],
-                    "密码": s.get("password", "N/A")
-                } for s in students]
-                creds_df = pd.DataFrame(creds_data)
-                creds_csv = creds_df.to_csv(index=False).encode('utf-8')
+                # Download credentials buttons
+                col1, col2 = st.columns(2)
 
-                st.download_button(
-                    label="📥 Download Class Credentials",
-                    data=creds_csv,
-                    file_name=f"{cls['name']}_credentials.csv",
-                    mime="text/csv",
-                    key=f"download_creds_{cls['id']}"
-                )
+                with col1:
+                    # PDF download with Chinese and emoji support
+                    pdf_data = create_credentials_pdf(cls['name'], students)
+                    st.download_button(
+                        label="📄 Download Class Credentials (PDF)",
+                        data=pdf_data,
+                        file_name=f"{cls['name']}_credentials.pdf",
+                        mime="application/pdf",
+                        key=f"download_pdf_{cls['id']}"
+                    )
+
+                with col2:
+                    # CSV download (fallback, may not display emoji correctly)
+                    creds_data = [{
+                        "姓名": s.get("full_name", s["username"]),
+                        "用户名": s["username"],
+                        "密码": s.get("password", "N/A")
+                    } for s in students]
+                    creds_df = pd.DataFrame(creds_data)
+                    creds_csv = creds_df.to_csv(index=False).encode('utf-8-sig')  # UTF-8 with BOM for Excel compatibility
+                    st.download_button(
+                        label="📊 Download as CSV (Excel)",
+                        data=creds_csv,
+                        file_name=f"{cls['name']}_credentials.csv",
+                        mime="text/csv",
+                        key=f"download_csv_{cls['id']}"
+                    )
 
                 # Student table with actions
                 for student in students:
