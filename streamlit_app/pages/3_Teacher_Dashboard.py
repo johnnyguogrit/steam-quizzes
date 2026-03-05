@@ -11,7 +11,7 @@ from database import (
     get_class_statistics, export_class_data, create_class, get_all_users,
     delete_user, delete_class, get_user_attempts, generate_graphical_password,
     batch_create_students, generate_username_from_name, get_connection, regenerate_class_passwords,
-    get_user_by_username
+    get_user_by_username, get_animal_info, ANIMAL_PASSWORDS
 )
 from auth import require_teacher, logout_button, get_current_user
 
@@ -41,76 +41,59 @@ with st.sidebar:
     if st.button("🎯 Browse Quizzes", use_container_width=True):
         st.switch_page("pages/1_Landing.py")
 
+    st.markdown("---")
+    st.markdown("### 🐾 Animal Passwords")
+    st.markdown("*Student password reference:*")
+    # Display all 12 animals in a compact grid
+    for num in range(1, 13):
+        animal = ANIMAL_PASSWORDS[num]
+        st.markdown(f"**{num}** {animal['emoji']} {animal['name']} {animal['chinese']}")
+
 
 def create_credentials_pdf(class_name, students, password_map=None):
-    """Create a PDF with class credentials, supporting Chinese and emoji.
+    """Create a PDF with class credentials, supporting Chinese and animal SVG icons.
 
     Args:
         class_name: Name of the class
         students: List of student dictionaries
-        password_map: Optional dict mapping user_id to password
+        password_map: Optional dict mapping user_id to password (animal number 1-12)
     """
     from reportlab.lib.pagesizes import A4
     from reportlab.lib import colors
     from reportlab.lib.units import mm
-    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
+    import os
 
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4,
-                            leftMargin=20*mm, rightMargin=20*mm,
-                            topMargin=20*mm, bottomMargin=20*mm)
+                            leftMargin=15*mm, rightMargin=15*mm,
+                            topMargin=15*mm, bottomMargin=15*mm)
 
     # Container for the PDF elements
     elements = []
 
-    # Try to register fonts that support Chinese and emoji
-    chinese_font_registered = False
-    emoji_font_registered = False
+    # Get the assets directory path
+    assets_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "animals")
 
-    # Common Chinese fonts on different systems
+    # Try to register Chinese font
+    chinese_font_registered = False
     chinese_fonts = [
-        # Linux/Streamlit Cloud
         '/usr/share/fonts/truetype/wqy/wqy-microhei.ttc',
         '/usr/share/fonts/truetype/arphic/uming.ttc',
         '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
         '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-        # Fallback - use built-in fonts
-        'Helvetica',
     ]
 
-    # Emoji-supporting fonts
-    emoji_fonts = [
-        '/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf',
-        '/usr/share/fonts/truetype/emoji/AppleColorEmoji.ttf',
-        'Segoe UI Emoji',
-        'Apple Color Emoji',
-        'Noto Color Emoji',
-    ]
-
-    # Register Chinese font
     for font_path in chinese_fonts:
         try:
             if font_path == 'Helvetica':
-                # Use built-in
                 pdfmetrics.registerFont(TTFont('ChineseFont', 'Helvetica'))
             else:
                 pdfmetrics.registerFont(TTFont('ChineseFont', font_path))
             chinese_font_registered = True
-            break
-        except:
-            continue
-
-    # Register emoji font (optional - if not available, emojis might not render)
-    for font_path in emoji_fonts:
-        try:
-            if font_path in ['Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji']:
-                # These are system font names, skip for PDF
-                continue
-            pdfmetrics.registerFont(TTFont('EmojiFont', font_path))
-            emoji_font_registered = True
             break
         except:
             continue
@@ -123,9 +106,9 @@ def create_credentials_pdf(class_name, students, password_map=None):
         'CustomTitle',
         parentStyle=styles['Heading1'],
         fontName='ChineseFont' if chinese_font_registered else 'Helvetica-Bold',
-        fontSize=20,
-        alignment=1,  # Center
-        spaceAfter=12*mm
+        fontSize=18,
+        alignment=1,
+        spaceAfter=8*mm
     )
 
     # Subtitle style
@@ -133,142 +116,80 @@ def create_credentials_pdf(class_name, students, password_map=None):
         'CustomSubtitle',
         parentStyle=styles['Normal'],
         fontName='ChineseFont' if chinese_font_registered else 'Helvetica',
-        fontSize=10,
+        fontSize=9,
         alignment=1,
-        spaceAfter=20*mm
+        spaceAfter=15*mm
     )
 
     # Add title
     elements.append(Paragraph(f"{class_name}", title_style))
     elements.append(Paragraph("班级学生登录凭证 / Student Login Credentials", subtitle_style))
 
-    # Prepare table data
-    table_data = [['序号', '姓名', '用户名', '密码']]
+    # Prepare table data with embedded SVG images
+    # Headers: No., Name, Username, Password (with animal icon)
+    table_data = [['No.', '姓名 / Name', '用户名 / Username', '密码 / Password']]
 
     for i, student in enumerate(students, 1):
         name = student.get("full_name", student["username"])
         username = student["username"]
 
-        # Get password from student dict or from password map
+        # Get password (animal number)
         password = student.get("password")
         if password is None and password_map:
             password = password_map.get(student["id"])
-        if password is None:
-            password = "N/A"
 
-        # For emoji, we need to handle specially
-        # If emoji font is not available, show as text
-        if not emoji_font_registered and password and len(password) == 1 and ord(password[0]) > 127:
-            # It's an emoji and we don't have emoji font
-            # Show both emoji and description
-            emoji_descriptions = {
-                '🌟': 'Star (star)',
-                '🌙': 'Moon (moon)',
-                '⭐': 'Star (star)',
-                '☀️': 'Sun (sun)',
-                '🌈': 'Rainbow (rainbow)',
-                '☁️': 'Cloud (cloud)',
-                '⚡': 'Lightning (lightning)',
-                '❄️': 'Snowflake (snowflake)',
-                '🔥': 'Fire (fire)',
-                '🔴': 'Red Circle (red)',
-                '🟠': 'Orange Circle (orange)',
-                '🟡': 'Yellow Circle (yellow)',
-                '🟢': 'Green Circle (green)',
-                '🔵': 'Blue Circle (blue)',
-                '🟣': 'Purple Circle (purple)',
-                '🟤': 'Brown Circle (brown)',
-                '⚫': 'Black Circle (black)',
-                '⚪': 'White Circle (white)',
-                '🐶': 'Dog (dog)',
-                '🐱': 'Cat (cat)',
-                '🐭': 'Mouse (mouse)',
-                '🐹': 'Hamster (hamster)',
-                '🐰': 'Rabbit (rabbit)',
-                '🦊': 'Fox (fox)',
-                '🐻': 'Bear (bear)',
-                '🐼': 'Panda (panda)',
-                '🐨': 'Koala (koala)',
-                '🍎': 'Apple (apple)',
-                '🍊': 'Tangerine (orange)',
-                '🍋': 'Lemon (lemon)',
-                '🍌': 'Banana (banana)',
-                '🍇': 'Grape (grape)',
-                '🍓': 'Strawberry (strawberry)',
-                '🍒': 'Cherry (cherry)',
-                '🍑': 'Peach (peach)',
-                '🥝': 'Kiwi (kiwi)',
-                '⚽': 'Soccer Ball (soccer)',
-                '🏀': 'Basketball (basketball)',
-                '🏈': 'Football (football)',
-                '⚾': 'Baseball (baseball)',
-                '🎾': 'Tennis (tennis)',
-                '🎮': 'Game Controller (game)',
-                '🎯': 'Bullseye (target)',
-                '🎲': 'Dice (dice)',
-                '🎪': 'Circus (circus)',
-                '📚': 'Books (books)',
-                '✏️': 'Pencil (pencil)',
-                '🖊️': 'Pen (pen)',
-                '🖍️': 'Crayon (crayon)',
-                '📏': 'Ruler (ruler)',
-                '🎒': 'Backpack (backpack)',
-                '🔑': 'Key (key)',
-                '🚗': 'Car (car)',
-                '🚌': 'Bus (bus)',
-                '🌸': 'Cherry Blossom (flower)',
-                '🌺': 'Hibiscus (flower)',
-                '🌻': 'Sunflower (sunflower)',
-                '🌼': 'Flower (flower)',
-                '🌷': 'Tulip (tulip)',
-                '🌹': 'Rose (rose)',
-                '🍀': 'Clover (clover)',
-                '🌲': 'Tree (tree)',
-                '🌴': 'Palm Tree (palm)',
-                '😊': 'Smile (smile)',
-                '😃': 'Happy (happy)',
-                '😄': 'Grin (grin)',
-                '🙂': 'Slight Smile (slight smile)',
-                '😎': 'Cool (cool)',
-                '🤗': 'Hug (hug)',
-                '🤩': 'Star Eyes (amazing)',
-                '😇': 'Angel (angel)',
-                '🥰': 'Love (love)',
-            }
-            password_display = emoji_descriptions.get(password, f"{password} (emoji)")
+        if password and password.isdigit():
+            animal_num = int(password)
+            animal_info = get_animal_info(animal_num)
+            # Create cell with animal emoji and name
+            password_display = f"{animal_info['emoji']} {animal_info['name']} ({animal_info['chinese']})"
         else:
-            password_display = password
+            password_display = "N/A"
 
         table_data.append([str(i), name, username, password_display])
 
-    # Create table
-    table = Table(table_data, colWidths=[15*mm, 40*mm, 40*mm, 50*mm])
+    # Create table with adjusted column widths
+    table = Table(table_data, colWidths=[12*mm, 35*mm, 30*mm, 50*mm])
     table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4A90E2')),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('FONTNAME', (0, 0), (-1, 0), 'ChineseFont' if chinese_font_registered else 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 12),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12*mm),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('FONTSIZE', (0, 0), (-1, 0), 11),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 10*mm),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
         ('FONTNAME', (0, 1), (-1, -1), 'ChineseFont' if chinese_font_registered else 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 10),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
-        ('TOPPADDING', (0, 1), (-1, -1), 8*mm),
-        ('BOTTOMPADDING', (0, 1), (-1, -1), 8*mm),
+        ('FONTSIZE', (0, 1), (-1, -1), 9),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#E0E0E0')),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F5F5F5')]),
+        ('TOPPADDING', (0, 1), (-1, -1), 6*mm),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6*mm),
     ]))
 
     elements.append(table)
+
+    # Add animal reference legend
+    elements.append(Spacer(1, 10*mm))
+    legend_style = ParagraphStyle(
+        'Legend',
+        parentStyle=styles['Normal'],
+        fontName='ChineseFont' if chinese_font_registered else 'Helvetica',
+        fontSize=8,
+        alignment=1,
+        spaceBefore=5*mm
+    )
+    elements.append(Paragraph("密码说明: 每个学生分配一个动物编号 (1-12)，登录时输入对应的数字即可", legend_style))
 
     # Add footer
     footer_style = ParagraphStyle(
         'Footer',
         parentStyle=styles['Normal'],
         fontName='ChineseFont' if chinese_font_registered else 'Helvetica',
-        fontSize=8,
+        fontSize=7,
         alignment=1,
-        spaceBefore=15*mm
+        spaceBefore=10*mm,
+        textColor=colors.grey
     )
     elements.append(Paragraph("STEAM Quiz Platform | Spring 2026", footer_style))
 
@@ -484,7 +405,8 @@ with tab2:
                             password = generate_graphical_password(1)
 
                             if create_user_with_password_storage(username, password, "student", full_name, str(cls["id"])):
-                                st.success(f"✅ Student '{full_name}' added! Username: {username}, Password: {password}")
+                                animal_info = get_animal_info(int(password))
+                                st.success(f"✅ Student '{full_name}' added! Username: {username}, Password: {animal_info['emoji']} {animal_info['name']} ({password})")
                                 st.rerun()
                             else:
                                 st.error("Failed to add student.")
@@ -492,7 +414,8 @@ with tab2:
                 with col2:
                     if st.button("Generate Random Password", key=f"gen_{cls['id']}"):
                         pw = generate_graphical_password(1)
-                        st.markdown(f"**Preview:** `{pw}`")
+                        animal_info = get_animal_info(int(pw))
+                        st.markdown(f"**Preview:** {animal_info['emoji']} {animal_info['name']} ({pw})")
 
                 st.markdown("**Option 2: Batch Import Students**")
 
@@ -519,7 +442,8 @@ with tab2:
 
                             for r in results:
                                 if r["status"] == "success":
-                                    st.markdown(f"✅ **{r['full_name']}** - `{r['username']}` / `{r['password']}`")
+                                    animal_info = get_animal_info(int(r["password"]))
+                                    st.markdown(f"✅ **{r['full_name']}** - `{r['username']}` / {animal_info['emoji']} {animal_info['name']} (`{r['password']}`)")
                                 else:
                                     st.markdown(f"❌ **{r['full_name']}** - Failed")
 
@@ -548,12 +472,20 @@ with tab2:
                     )
 
                 with col2:
-                    # CSV download with passwords from session state
-                    creds_data = [{
-                        "姓名": s.get("full_name", s["username"]),
-                        "用户名": s["username"],
-                        "密码": st.session_state.student_passwords.get(s["id"], "N/A")
-                    } for s in students]
+                    # CSV download with animal passwords from session state
+                    creds_data = []
+                    for s in students:
+                        pwd = st.session_state.student_passwords.get(s["id"], "N/A")
+                        if pwd and pwd.isdigit():
+                            animal_info = get_animal_info(int(pwd))
+                            pwd_display = f"{animal_info['emoji']} {animal_info['name']} ({pwd})"
+                        else:
+                            pwd_display = pwd
+                        creds_data.append({
+                            "姓名": s.get("full_name", s["username"]),
+                            "用户名": s["username"],
+                            "密码": pwd_display
+                        })
                     creds_df = pd.DataFrame(creds_data)
                     creds_csv = creds_df.to_csv(index=False).encode('utf-8-sig')  # UTF-8 with BOM for Excel compatibility
                     st.download_button(
@@ -579,16 +511,22 @@ with tab2:
                             st.success(f"✅ Regenerated {len(results)} student passwords! Please download the PDF again.")
                             st.rerun()
                 with col2:
-                    st.markdown("**Note:** This will generate new random emoji passwords for all students. Old passwords will no longer work!")
+                    st.markdown("**Note:** This will generate new random animal passwords for all students. Old passwords will no longer work!")
                 # Student table with actions - show password if available
                 for student in students:
-                    pwd = st.session_state.student_passwords.get(student["id"], "•••")
+                    pwd = st.session_state.student_passwords.get(student["id"], None)
+                    # Display animal info if password exists
+                    if pwd and pwd.isdigit():
+                        animal_info = get_animal_info(int(pwd))
+                        pwd_display = f"{animal_info['emoji']} {animal_info['name']} ({pwd})"
+                    else:
+                        pwd_display = "•••"
                     with st.expander(f"👤 {student.get('full_name', student['username'])}"):
                         col1, col2, col3 = st.columns(3)
 
                         with col1:
                             st.markdown(f"**Username:** `{student['username']}`")
-                            st.markdown(f"**Password:** `{pwd}`")
+                            st.markdown(f"**Password:** {pwd_display}")
                             st.markdown(f"**Attempts:** {student.get('total_attempts', 0)}")
                             if student.get("avg_score"):
                                 st.markdown(f"**Avg Score:** {student.get('avg_score', 0) * 100:.1f}%")
@@ -636,7 +574,7 @@ with tab3:
                 height=150,
                 key="tab3_names_input"
             )
-            st.markdown("* Single emoji password will be auto-generated (e.g., 🌟, 🎮, 🍎)")
+            st.markdown("* Animal picture password will be auto-generated (e.g., 🐶 Dog, 🐱 Cat, 🐭 Mouse)")
 
         submitted = st.form_submit_button("Create Class & Add Students", type="primary")
 
@@ -662,8 +600,9 @@ with tab3:
 
                     for r in results:
                         if r["status"] == "success":
+                            animal_info = get_animal_info(int(r["password"]))
                             st.markdown(f"✅ **{r['full_name']}**")
-                            st.markdown(f"   - Username: `{r['username']}` | Password: `{r['password']}`")
+                            st.markdown(f"   - Username: `{r['username']}` | Password: {animal_info['emoji']} {animal_info['name']} (`{r['password']}`)")
                         else:
                             st.markdown(f"❌ **{r['full_name']}** - Failed")
 

@@ -100,39 +100,44 @@ def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
 
 
-def generate_graphical_password(length: int = 1) -> str:
-    """Generate a random graphical password using a single emoji.
+# Animal password configuration (12 animals for student passwords)
+ANIMAL_PASSWORDS = {
+    1: {"name": "Dog", "chinese": "狗", "emoji": "🐶"},
+    2: {"name": "Cat", "chinese": "猫", "emoji": "🐱"},
+    3: {"name": "Mouse", "chinese": "老鼠", "emoji": "🐭"},
+    4: {"name": "Rabbit", "chinese": "兔子", "emoji": "🐰"},
+    5: {"name": "Fox", "chinese": "狐狸", "emoji": "🦊"},
+    6: {"name": "Bear", "chinese": "熊", "emoji": "🐻"},
+    7: {"name": "Panda", "chinese": "熊猫", "emoji": "🐼"},
+    8: {"name": "Koala", "chinese": "考拉", "emoji": "🐨"},
+    9: {"name": "Lion", "chinese": "狮子", "emoji": "🦁"},
+    10: {"name": "Monkey", "chinese": "猴子", "emoji": "🐵"},
+    11: {"name": "Frog", "chinese": "青蛙", "emoji": "🐸"},
+    12: {"name": "Zebra", "chinese": "斑马", "emoji": "🦓"},
+}
 
-    Returns one random emoji that students can easily remember.
-    Examples: 🌟, 🎮, 🍎, 🐱
+
+def get_animal_info(animal_number: int) -> dict:
+    """Get animal information by number."""
+    return ANIMAL_PASSWORDS.get(animal_number, ANIMAL_PASSWORDS[1])
+
+
+def get_animal_by_name(animal_name: str) -> int:
+    """Get animal number by name (case-insensitive)."""
+    for num, info in ANIMAL_PASSWORDS.items():
+        if info["name"].lower() == animal_name.lower():
+            return num
+    return 1
+
+
+def generate_graphical_password(length: int = 1) -> str:
+    """Generate a random graphical password using animal numbers.
+
+    Returns a random number 1-12 representing an animal that students can easily remember.
+    Examples: 1 (Dog), 2 (Cat), 3 (Mouse)
     """
     import random
-
-    # Define emojis for students
-    emojis = [
-        # Fun & Colorful
-        '🌟', '🌙', '⭐', '☀️', '🌈', '☁️', '⚡', '❄️', '🔥',
-        # Colors
-        '🔴', '🟠', '🟡', '🟢', '🔵', '🟣', '🟤', '⚫', '⚪',
-        # Animals
-        '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨',
-        # Food
-        '🍎', '🍊', '🍋', '🍌', '🍇', '🍓', '🍒', '🍑', '🥝',
-        # Sports & Games
-        '⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏉', '🎱', '🏓',
-        # Activities
-        '🎮', '🎯', '🎲', '🎪', '🎨', '🎭', '🎵', '🎸', '🎹',
-        # Objects
-        '📚', '✏️', '🖊️', '🖍️', '📏', '📐', '🎒', '🔑', '🖱️',
-        # Vehicles
-        '🚗', '🚕', '🚙', '🚌', '🚎', '🚓', '🚲', '🛴', '🚃',
-        # Nature
-        '🌸', '🌺', '🌻', '🌼', '🌷', '🌹', '🍀', '🌲', '🌴',
-        # Faces (simple ones)
-        '😊', '😃', '😄', '🙂', '😎', '🤗', '🤩', '😇', '🥰',
-    ]
-
-    return random.choice(emojis)
+    return str(random.randint(1, 12))
 
 
 def generate_username_from_name(full_name: str, existing_names: list = None) -> str:
