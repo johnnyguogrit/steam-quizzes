@@ -3,7 +3,7 @@
 ## Project Overview
 
 **Project Name**: STEAM Quiz Platform
-**Version**: 1.3.3
+**Version**: 1.4.0
 **Repository**: https://github.com/johnnyguogrit/steam-quizzes
 **Deployment**: https://steam-quizzes.streamlit.app
 **Status**: Production ✅
@@ -330,6 +330,7 @@ streamlit run streamlit_app/app.py
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v1.4.0 | 2026-03-05 | Add animal picture passwords (Code.org style) - 12 animals with SVG icons, emoji display, and bilingual names |
 | v1.3.3 | 2026-03-05 | Fix SyntaxError caused by missing comma in import statement |
 | v1.3.1 | 2026-03-05 | Fix password storage for PDF credentials (store in session state) |
 | v1.3.0 | 2026-03-05 | Add PDF download for Class Credentials with Chinese and emoji support |
