@@ -430,6 +430,32 @@ def delete_user(user_id: int) -> bool:
     return deleted
 
 
+def delete_class(class_id: int) -> bool:
+    """Delete a class and all its students."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        # First, get all students in this class
+        cursor.execute("SELECT id FROM users WHERE class_id = ?", (str(class_id),))
+        student_ids = [row[0] for row in cursor.fetchall()]
+
+        # Delete all data for each student
+        for student_id in student_ids:
+            cursor.execute("DELETE FROM quiz_attempts WHERE user_id = ?", (student_id,))
+            cursor.execute("DELETE FROM badges WHERE user_id = ?", (student_id,))
+            cursor.execute("DELETE FROM users WHERE id = ?", (student_id,))
+
+        # Delete the class
+        cursor.execute("DELETE FROM classes WHERE id = ?", (class_id,))
+        conn.commit()
+        return cursor.rowcount > 0
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        conn.close()
+
+
 def get_all_users(role: Optional[str] = None) -> List[Dict]:
     """Get all users, optionally filtered by role."""
     conn = get_connection()

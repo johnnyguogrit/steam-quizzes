@@ -8,7 +8,7 @@ import pandas as pd
 from database import (
     get_user, create_user, get_classes_by_teacher, get_students_by_class,
     get_class_statistics, export_class_data, create_class, get_all_users,
-    delete_user, get_user_attempts
+    delete_user, delete_class, get_user_attempts
 )
 from auth import require_teacher, logout_button, get_current_user
 
@@ -103,8 +103,31 @@ with tab2:
 
     if classes:
         for cls in classes:
-            with st.expander(f"📚 {cls['name']} - {cls['student_count']} students"):
+            student_count = cls.get("student_count", 0)
+            class_header = f"📚 {cls['name']} - {student_count} student{'s' if student_count != 1 else ''}"
+
+            with st.expander(class_header):
                 st.markdown(f"**Grade Level:** {cls.get('grade_level', 'N/A')}")
+
+                # Delete class button at the top
+                if st.button(f"🗑 Delete Class", key=f"delete_class_{cls['id']}", type="secondary"):
+                    # Confirm before deleting
+                    if f"confirm_delete_{cls['id']}" not in st.session_state:
+                        st.session_state[f"confirm_delete_{cls['id']}"] = False
+
+                    if not st.session_state[f"confirm_delete_{cls['id']}"]:
+                        st.warning(f"⚠️ This will delete the class '{cls['name']}' and ALL students in it!")
+                        if st.button("Confirm Delete", key=f"confirm_{cls['id']}", type="primary"):
+                            st.session_state[f"confirm_delete_{cls['id']}"] = True
+                            st.rerun()
+                    else:
+                        if delete_class(cls["id"]):
+                            st.success(f"Class '{cls['name']}' deleted successfully!")
+                            st.rerun()
+                        else:
+                            st.error("Failed to delete class.")
+
+                st.markdown("---")
 
                 # Show students
                 students = get_students_by_class(str(cls["id"]))
@@ -135,7 +158,7 @@ with tab2:
 
                     col1, col2 = st.columns(2)
                     with col1:
-                        if st.button("� View Progress", key=f"view_{cls['id']}_{selected_student}"):
+                        if st.button("View Progress", key=f"view_{cls['id']}_{selected_student}"):
                             st.session_state.viewing_student_id = selected_student
                             st.rerun()
                     with col2:
