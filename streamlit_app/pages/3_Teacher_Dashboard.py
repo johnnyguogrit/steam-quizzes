@@ -10,7 +10,7 @@ from database import (
     get_user, create_user, get_classes_by_teacher, get_students_by_class,
     get_class_statistics, export_class_data, create_class, get_all_users,
     delete_user, delete_class, get_user_attempts, generate_graphical_password,
-    batch_create_students, generate_username_from_name, get_connection, regenerate_class_passwords
+    batch_create_students, generate_username_from_name, get_connection, regenerate_class_passwords,
     get_user_by_username
 )
 from auth import require_teacher, logout_button, get_current_user
