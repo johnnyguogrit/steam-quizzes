@@ -1,11 +1,10 @@
 """
 Quiz Viewer Page
-Displays the selected quiz in an iframe and handles score submission.
+Displays the selected quiz and handles score submission.
 """
 
 import streamlit as st
 import os
-import time
 from auth import require_auth, logout_button
 from config import get_quiz_by_id
 from database import record_quiz_attempt
@@ -60,7 +59,6 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # Get the quiz file path
-# Determine the base directory - works both locally and on Streamlit Cloud
 # Current file is in streamlit_app/pages/, need to go up two levels to repo root
 current_dir = os.path.dirname(os.path.abspath(__file__))
 base_dir = os.path.dirname(os.path.dirname(current_dir))
@@ -84,182 +82,211 @@ if not os.path.exists(quiz_path):
     """)
     st.stop()
 
-# Create a modified version of the quiz HTML with score reporting
 # Read the original HTML
 with open(quiz_path, 'r', encoding='utf-8') as f:
     quiz_html = f.read()
 
-# Inject score reporting script
-score_script = f"""
+# Get the CSS file path for styling
+css_path = os.path.join(os.path.dirname(quiz_path), 'styles.css')
+quiz_css = ""
+if os.path.exists(css_path):
+    with open(css_path, 'r', encoding='utf-8') as f:
+        quiz_css = f.read()
+
+# Get the JS file path
+js_path = os.path.join(os.path.dirname(quiz_path), 'script.js')
+quiz_js = ""
+if os.path.exists(js_path):
+    with open(js_path, 'r', encoding='utf-8') as f:
+        quiz_js = f.read()
+
+# Inject score reporting and Streamlit communication
+injected_js = f"""
 <script>
-// Override the showResults function to report score to Streamlit
-const originalShowResults = window.showResults;
-const originalCheckAnswers = window.checkAnswers;
+// Streamlit Quiz Integration
+(function() {{
+    window.quizId = "{quiz_id}";
+    window.userId = {st.session_state.user_id};
+    window.startTime = Date.now();
+    window.quizCompleted = false;
 
-// Store quiz info
-window.quizId = "{quiz_id}";
-window.userId = {st.session_state.user_id};
-window.startTime = Date.now();
+    // Function to send score to Streamlit
+    window.reportScore = function(score, total) {{
+        if (window.quizCompleted) return;
+        window.quizCompleted = true;
 
-// Intercept checkAnswers to track completion
-if (typeof window.checkAnswers === 'function') {{
-    const originalCheckAnswers = window.checkAnswers;
-    window.checkAnswers = function() {{
-        const result = originalCheckAnswers.apply(this, arguments);
-        // Wait a bit for results to be calculated
-        setTimeout(() => {{
-            sendScoreToStreamlit();
-        }}, 500);
-        return result;
-    }};
-}}
+        const timeSpent = Math.round((Date.now() - window.startTime) / 1000);
+        const percentage = Math.round((score / total) * 100);
 
-function sendScoreToStreamlit() {{
-    // Try to find the score
-    let score = 0;
-    let total = {quiz['questions']};
-
-    // Try to get score from various possible locations
-    const scoreText = document.querySelector('#scoreText')?.textContent ||
-                      document.querySelector('.score')?.textContent ||
-                      document.querySelector('[id*="score"]')?.textContent;
-
-    if (scoreText) {{
-        const match = scoreText.match(/(\\d+)\\s*out of\\s*(\\d+)/);
-        if (match) {{
-            score = parseInt(match[1]);
-            total = parseInt(match[2]);
+        // Update the results display
+        const resultsDiv = document.getElementById('streamlit-quiz-results');
+        if (resultsDiv) {{
+            resultsDiv.innerHTML = `
+                <div style="padding: 20px; background: #e8f5e9; border-radius: 10px; text-align: center; margin-top: 20px;">
+                    <h2 style="color: #4caf50;">🎉 Quiz Completed!</h2>
+                    <p style="font-size: 1.2rem;"><strong>Score: ${{score}}/${{total}} (${{percentage}}%)</strong></p>
+                    <p>Time spent: ${{timeSpent}} seconds</p>
+                    <p style="color: #666;">Your result has been saved!</p>
+                </div>
+            `;
         }}
+
+        // Store in session state for Streamlit
+        if (typeof window.parent !== 'undefined' && window.parent.postMessage) {{
+            window.parent.postMessage({{
+                type: 'quiz_completed',
+                quizId: "{quiz_id}",
+                userId: {st.session_state.user_id},
+                score: score,
+                total: total,
+                timeSpent: timeSpent
+            }}, '*');
+        }}
+
+        console.log('Quiz completed:', {{ score, total, timeSpent }});
+    }};
+
+    // Override checkAnswers function
+    const originalCheckAnswers = window.checkAnswers;
+    if (typeof originalCheckAnswers === 'function') {{
+        window.checkAnswers = function() {{
+            const result = originalCheckAnswers.apply(this, arguments);
+
+            // Wait for results to be calculated, then extract score
+            setTimeout(() => {{
+                let score = 0;
+                let total = {quiz['questions']};
+
+                // Try to get score from DOM
+                const scoreText = document.querySelector('#scoreText')?.textContent ||
+                                  document.querySelector('.score')?.textContent ||
+                                  document.querySelector('[id*="score"]')?.textContent;
+
+                if (scoreText) {{
+                    const match = scoreText.match(/(\\d+)\\s*out of\\s*(\\d+)/);
+                    if (match) {{
+                        score = parseInt(match[1]);
+                        total = parseInt(match[2]);
+                    }}
+                }}
+
+                // Count correct answers if no score found
+                if (score === 0) {{
+                    const correctOptions = document.querySelectorAll('.option.correct');
+                    const selectedCorrect = document.querySelectorAll('.option.correct.selected');
+                    if (correctOptions.length > 0) {{
+                        score = selectedCorrect.length;
+                        total = correctOptions.length;
+                    }}
+                }}
+
+                window.reportScore(score, total);
+            }}, 300);
+
+            return result;
+        }};
     }}
 
-    // Send to parent
-    const timeSpent = Math.round((Date.now() - window.startTime) / 1000);
-    window.parent.postMessage({{
-        type: 'quiz_completed',
-        quizId: "{quiz_id}",
-        userId: {st.session_state.user_id},
-        score: score,
-        total: total,
-        timeSpent: timeSpent
-    }}, '*');
-
-    console.log('Score sent:', {{ score, total, timeSpent }});
-}}
-
-// Also try to intercept the results display
-const observer = new MutationObserver((mutations) => {{
-    mutations.forEach((mutation) => {{
-        if (mutation.addedNodes.length) {{
+    // Watch for results div to appear
+    const observer = new MutationObserver((mutations) => {{
+        mutations.forEach((mutation) => {{
             mutation.addedNodes.forEach((node) => {{
                 if (node.id === 'results' || node.classList?.contains('results')) {{
-                    setTimeout(sendScoreToStreamlit, 100);
+                    setTimeout(() => {{
+                        let score = 0;
+                        let total = {quiz['questions']};
+
+                        const scoreText = node.querySelector('#scoreText')?.textContent ||
+                                        node.querySelector('.score')?.textContent;
+
+                        if (scoreText) {{
+                            const match = scoreText.match(/(\\d+)\\s*out of\\s*(\\d+)/);
+                            if (match) {{
+                                score = parseInt(match[1]);
+                                total = parseInt(match[2]);
+                            }}
+                        }}
+
+                        window.reportScore(score, total);
+                    }}, 200);
                 }}
             }});
-        }}
+        }});
     }});
-}});
 
-observer.observe(document.body, {{ childList: true, subtree: true }});
+    observer.observe(document.body, {{ childList: true, subtree: true }});
+}})();
 </script>
+
+<!-- Container for results -->
+<div id="streamlit-quiz-results"></div>
 """
 
-# Insert the script before closing body tag
+# Insert CSS if available
+if quiz_css:
+    quiz_html = quiz_html.replace('</head>', f'<style>{quiz_css}</style></head>')
+
+# Insert the injected JS before closing body tag
 if '</body>' in quiz_html:
-    quiz_html = quiz_html.replace('</body>', score_script + '</body>')
+    quiz_html = quiz_html.replace('</body>', injected_js + '</body>')
 else:
-    quiz_html += score_script
+    quiz_html = quiz_html.replace('</html>', injected_js + '</html>')
 
-# Display the quiz in a container that can receive postMessages
-st.markdown("""
-<style>
-    .quiz-container {
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        overflow: hidden;
-        background: white;
-    }
-    .quiz-frame {
-        width: 100%;
-        min-height: 700px;
-        border: none;
-    }
-</style>
-""", unsafe_allow_html=True)
+# Also append the original quiz JS
+if quiz_js:
+    quiz_html = quiz_html.replace('</body>', f'<script>{quiz_js}</script></body>')
 
-# Create a temporary file with the modified HTML
-import tempfile
-with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8') as tmp:
-    tmp.write(quiz_html)
-    tmp_path = tmp.name
+# Display the quiz using st.html (Streamlit 1.31+)
+try:
+    st.html(quiz_html, height=800)
+except Exception as e:
+    # Fallback to components.v1.html for older Streamlit versions
+    st.components.v1.html(quiz_html, height=800, scrolling=True)
 
-# Display instructions
-st.info("""
-    👆 **Complete the quiz above!** Your score will be automatically saved when you click "Check Answers".
-    You can take the quiz multiple times - your best score will be recorded.
-""")
-
-# Inject JavaScript to receive postMessages from iframe
-st.markdown(f"""
-<script>
-// Listen for messages from the quiz iframe
-window.addEventListener('message', function(event) {{
-    if (event.data.type === 'quiz_completed') {{
-        // Store in session state
-        const payload = {{
-            quiz_id: event.data.quizId,
-            user_id: event.data.userId,
-            score: event.data.score,
-            total: event.data.total,
-            time_spent: event.data.timeSpent
-        }};
-
-        // Send to Streamlit via hidden input
-        const input = document.getElementById('quiz-completed-data');
-        if (input) {{
-            input.value = JSON.stringify(payload);
-            input.dispatchEvent(new Event('input', {{ bubbles: true }}));
-        }}
-    }}
-}});
-</script>
-<input type="hidden" id="quiz-completed-data" value="">
-""", unsafe_allow_html=True)
-
-# Display the quiz
-st.components.v1.iframe(
-    src=f"file://{tmp_path}",
-    height=700,
-    scrolling=True
+# Hidden input to receive data from JavaScript via postMessage
+quiz_result = st.text_input(
+    "",
+    key="quiz_completed_data",
+    label_visibility="collapsed"
 )
-
-# Hidden input to receive data from JavaScript
-quiz_result = st.text_input("", key="quiz_completed_data", label_visibility="collapsed")
 
 # Process the result when received
 if quiz_result:
     try:
         import json
         data = json.loads(quiz_result)
-        record_quiz_attempt(
-            data['user_id'],
-            data['quiz_id'],
-            data['score'],
-            data['total'],
-            data.get('time_spent', 0)
-        )
-        st.success(f"""
-            🎉 **Quiz completed!**
-            - Score: {data['score']}/{data['total']} ({round(data['score']/data['total']*100)}%)
-            - Time: {data.get('time_spent', 0)} seconds
 
-            Your result has been saved!
-        """)
-        st.balloons()
+        if data.get('quiz_id') == quiz_id:
+            record_quiz_attempt(
+                data['user_id'],
+                data['quiz_id'],
+                data['score'],
+                data['total'],
+                data.get('time_spent', 0)
+            )
+
+            percentage = round(data['score'] / data['total'] * 100)
+
+            st.success(f"""
+                🎉 **Quiz Completed!**
+                - Score: {data['score']}/{data['total']} ({percentage}%)
+                - Time: {data.get('time_spent', 0)} seconds
+
+                Your result has been saved!
+            """)
+            st.balloons()
+
+            # Clear the input to prevent duplicate saves
+            st.session_state.quiz_completed_data = ""
     except Exception as e:
         st.error(f"Error saving quiz result: {e}")
 
-# Cleanup temp file
-try:
-    os.unlink(tmp_path)
-except:
-    pass
+# Instructions
+st.markdown("""
+---
+### Instructions
+1. Answer all questions by selecting the best option
+2. Click "Check Answers" when you're done
+3. Your score will be automatically saved
+4. You can retake the quiz to improve your score!
+""")
