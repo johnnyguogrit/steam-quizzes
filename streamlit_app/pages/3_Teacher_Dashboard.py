@@ -49,6 +49,13 @@ st.markdown("""
         font-weight: bold;
         color: #667eea;
     }
+    .delete-warning {
+        padding: 15px;
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        border-radius: 5px;
+        margin: 10px 0;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -109,23 +116,52 @@ with tab2:
             with st.expander(class_header):
                 st.markdown(f"**Grade Level:** {cls.get('grade_level', 'N/A')}")
 
-                # Delete class button at the top
-                if st.button(f"🗑 Delete Class", key=f"delete_class_{cls['id']}", type="secondary"):
-                    # Confirm before deleting
-                    if f"confirm_delete_{cls['id']}" not in st.session_state:
-                        st.session_state[f"confirm_delete_{cls['id']}"] = False
+                # Delete class section
+                st.markdown("---")
 
-                    if not st.session_state[f"confirm_delete_{cls['id']}"]:
-                        st.warning(f"⚠️ This will delete the class '{cls['name']}' and ALL students in it!")
-                        if st.button("Confirm Delete", key=f"confirm_{cls['id']}", type="primary"):
-                            st.session_state[f"confirm_delete_{cls['id']}"] = True
+                # Use a container for delete UI
+                delete_key = f"delete_class_{cls['id']}"
+                confirm_key = f"confirm_delete_{cls['id']}"
+
+                # Initialize session state
+                if confirm_key not in st.session_state:
+                    st.session_state[confirm_key] = False
+
+                if not st.session_state[confirm_key]:
+                    # Show delete button
+                    if st.button(f"🗑 Delete Class", key=delete_key, type="secondary"):
+                        st.session_state[confirm_key] = True
+                        st.rerun()
+                else:
+                    # Show confirmation UI
+                    st.markdown(f"""
+                        <div class="delete-warning">
+                            <strong>⚠️ Warning:</strong> You are about to delete the class <strong>"{cls['name']}"</strong>.<br>
+                            This will also delete all {student_count} student{'s' if student_count != 1 else ''} in this class and all their data!<br>
+                            <strong>This action cannot be undone!</strong>
+                        </div>
+                    """, unsafe_allow_html=True)
+
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        if st.button("✅ Confirm Delete", key=f"ok_{cls['id']}", type="primary"):
+                            try:
+                                if delete_class(cls["id"]):
+                                    st.success(f"Class '{cls['name']}' deleted successfully!")
+                                    # Clear the confirmation state
+                                    if confirm_key in st.session_state:
+                                        del st.session_state[confirm_key]
+                                    st.rerun()
+                                else:
+                                    st.error("Failed to delete class.")
+                            except Exception as e:
+                                st.error(f"Error deleting class: {e}")
+
+                    with col2:
+                        if st.button("❌ Cancel", key=f"cancel_{cls['id']}"):
+                            if confirm_key in st.session_state:
+                                del st.session_state[confirm_key]
                             st.rerun()
-                    else:
-                        if delete_class(cls["id"]):
-                            st.success(f"Class '{cls['name']}' deleted successfully!")
-                            st.rerun()
-                        else:
-                            st.error("Failed to delete class.")
 
                 st.markdown("---")
 
@@ -152,7 +188,7 @@ with tab2:
                     selected_student = st.selectbox(
                         "Select student to manage:",
                         options=[s["id"] for s in students],
-                        format_func=lambda x: next(s["full_name"] or s["username"] for s in students if s["id"] == x),
+                        format_func=lambda x: next((s["full_name"] or s["username"] for s in students if s["id"] == x), str(x)),
                         key=f"select_student_{cls['id']}"
                     )
 
