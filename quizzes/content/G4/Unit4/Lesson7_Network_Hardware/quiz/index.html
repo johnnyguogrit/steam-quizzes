@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 7 Quiz - Network Hardware</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Lesson 7 Quiz: Network Hardware</h1>
+            <h2>第七课测验：网络硬件</h2>
+        </header>
+
+        <form id="quizForm" class="quiz-form">
+            <!-- Question 1 -->
+            <div class="question">
+                <h3>Q1. What is a router?</h3>
+                <p class="question-cn">Q1. 什么是路由器？</p>
+                <div class="options">
+                    <label><input type="radio" name="q1" value="A"> A. A device that connects networks and directs data</label>
+                    <label><input type="radio" name="q1" value="B"> B. A type of computer mouse</label>
+                    <label><input type="radio" name="q1" value="C"> C. A tool for cutting cables</label>
+                    <label><input type="radio" name="q1" value="D"> D. A video game console</label>
+                </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="question">
+                <h3>Q2. What is the difference between a router and a switch?</h3>
+                <p class="question-cn">Q2. 路由器和交换机有什么区别？</p>
+                <div class="options">
+                    <label><input type="radio" name="q2" value="A"> A. They are the same thing</label>
+                    <label><input type="radio" name="q2" value="B"> B. Router connects networks; switch connects devices within a network</label>
+                    <label><input type="radio" name="q2" value="C"> C. Switch connects networks; router connects devices</label>
+                    <label><input type="radio" name="q2" value="D"> D. Router is wireless; switch is always wired</label>
+                </div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="question">
+                <h3>Q3. What is a server?</h3>
+                <p class="question-cn">Q3. 什么是服务器？</p>
+                <div class="options">
+                    <label><input type="radio" name="q3" value="A"> A. A person who brings you food at a restaurant</label>
+                    <label><input type="radio" name="q3" value="B"> B. A powerful computer that provides services to other computers</label>
+                    <label><input type="radio" name="q3" value="C"> C. A type of cable</label>
+                    <label><input type="radio" name="q3" value="D"> D. A WiFi password</label>
+                </div>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="question">
+                <h3>Q4. Which cable is the most common network cable?</h3>
+                <p class="question-cn">Q4. 哪种电缆是最常见的网络电缆？</p>
+                <div class="options">
+                    <label><input type="radio" name="q4" value="A"> A. Fiber optic cable</label>
+                    <label><input type="radio" name="q4" value="B"> B. Phone cable</label>
+                    <label><input type="radio" name="q4" value="C"> C. Ethernet cable</label>
+                    <label><input type="radio" name="q4" value="D"> D. Power cable</label>
+                </div>
+            </div>
+
+            <!-- Question 5 -->
+            <div class="question">
+                <h3>Q5. What does WiFi use to send data?</h3>
+                <p class="question-cn">Q5. WiFi使用什么来传输数据？</p>
+                <div class="options">
+                    <label><input type="radio" name="q5" value="A"> A. Light</label>
+                    <label><input type="radio" name="q5" value="B"> B. Sound waves</label>
+                    <label><input type="radio" name="q5" value="C"> C. Radio waves</label>
+                    <label><input type="radio" name="q5" value="D"> D. Water waves</label>
+                </div>
+            </div>
+
+            <!-- Question 6 -->
+            <div class="question">
+                <h3>Q6. What is network topology?</h3>
+                <p class="question-cn">Q6. 什么是网络拓扑？</p>
+                <div class="options">
+                    <label><input type="radio" name="q6" value="A"> A. The study of maps</label>
+                    <label><input type="radio" name="q6" value="B"> B. The shape or layout of a network</label>
+                    <label><input type="radio" name="q6" value="C"> C. A type of cable</label>
+                    <label><input type="radio" name="q6" value="D"> D. The speed of a network</label>
+                </div>
+            </div>
+
+            <!-- Question 7 -->
+            <div class="question">
+                <h3>Q7. Which topology is most common in homes and schools?</h3>
+                <p class="question-cn">Q7. 哪种拓扑结构在家庭和学校中最常见？</p>
+                <div class="options">
+                    <label><input type="radio" name="q7" value="A"> A. Star topology</label>
+                    <label><input type="radio" name="q7" value="B"> B. Bus topology</label>
+                    <label><input type="radio" name="q7" value="C"> C. Mesh topology</label>
+                    <label><input type="radio" name="q7" value="D"> D. Ring topology</label>
+                </div>
+            </div>
+
+            <!-- Bonus Question -->
+            <div class="bonus-question">
+                <h3>Bonus Question</h3>
+                <h4>Name two network devices you have seen in your home or school and explain what each does:</h4>
+                <p class="question-cn">bonus题：说出你在家里或学校见过的两种网络设备，并解释每种设备的作用：</p>
+                <textarea name="bonus" rows="5" placeholder="Write about the network devices you have seen..."></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">Submit Quiz | 提交测验</button>
+        </form>
+
+        <div id="result" class="result hidden"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 8 Quiz - Network Design Project</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Lesson 8 Quiz: Network Design Project</h1>
+            <h2>第八课测验：网络设计项目</h2>
+        </header>
+
+        <form id="quizForm" class="quiz-form">
+            <!-- Question 1 -->
+            <div class="question">
+                <h3>Q1. What is the first step in designing a network?</h3>
+                <p class="question-cn">Q1. 设计网络的第一步是什么？</p>
+                <div class="options">
+                    <label><input type="radio" name="q1" value="A"> A. Buy the equipment</label>
+                    <label><input type="radio" name="q1" value="B"> B. Analyze requirements</label>
+                    <label><input type="radio" name="q1" value="C"> C. Draw the diagram</label>
+                    <label><input type="radio" name="q1" value="D"> D. Present to the class</label>
+                </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="question">
+                <h3>Q2. Why should students and staff networks be separate?</h3>
+                <p class="question-cn">Q2. 为什么学生和教职员工的网络应该分开？</p>
+                <div class="options">
+                    <label><input type="radio" name="q2" value="A"> A. To make the network faster</label>
+                    <label><input type="radio" name="q2" value="B"> B. For security</label>
+                    <label><input type="radio" name="q2" value="C"> C. To save money</label>
+                    <label><input type="radio" name="q2" value="D"> D. Because teachers don't like students</label>
+                </div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="question">
+                <h3>Q3. What is a network zone?</h3>
+                <p class="question-cn">Q3. 什么是网络区域？</p>
+                <div class="options">
+                    <label><input type="radio" name="q3" value="A"> A. A geographic area</label>
+                    <label><input type="radio" name="q3" value="B"> B. A time zone for networks</label>
+                    <label><input type="radio" name="q3" value="C"> C. A separate part of a network for specific users</label>
+                    <label><input type="radio" name="q3" value="D"> D. A type of cable</label>
+                </div>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="question">
+                <h3>Q4. Where should the main router be placed?</h3>
+                <p class="question-cn">Q4. 主路由器应该放在哪里？</p>
+                <div class="options">
+                    <label><input type="radio" name="q4" value="A"> A. In the cafeteria</label>
+                    <label><input type="radio" name="q4" value="B"> B. Near the internet connection</label>
+                    <label><input type="radio" name="q4" value="C"> C. In a classroom</label>
+                    <label><input type="radio" name="q4" value="D"> D. Outside the building</label>
+                </div>
+            </div>
+
+            <!-- Question 5 -->
+            <div class="question">
+                <h3>Q5. What is the purpose of a network diagram?</h3>
+                <p class="question-cn">Q5. 网络图的目的是什么？</p>
+                <div class="options">
+                    <label><input type="radio" name="q5" value="A"> A. To make the network look pretty</label>
+                    <label><input type="radio" name="q5" value="B"> B. To show how devices are connected</label>
+                    <label><input type="radio" name="q5" value="C"> C. To confuse people</label>
+                    <label><input type="radio" name="q5" value="D"> D. To sell equipment</label>
+                </div>
+            </div>
+
+            <!-- Question 6 -->
+            <div class="question">
+                <h3>Q6. What is scalability in network design?</h3>
+                <p class="question-cn">Q6. 什么是网络设计中的可扩展性？</p>
+                <div class="options">
+                    <label><input type="radio" name="q6" value="A"> A. How big the network is</label>
+                    <label><input type="radio" name="q6" value="B"> B. How fast the network is</label>
+                    <label><input type="radio" name="q6" value="C"> C. The ability to expand the network in the future</label>
+                    <label><input type="radio" name="q6" value="D"> D. The color of the cables</label>
+                </div>
+            </div>
+
+            <!-- Question 7 -->
+            <div class="question">
+                <h3>Q7. Which of the following should a network diagram include?</h3>
+                <p class="question-cn">Q7. 网络图应该包含以下哪项？</p>
+                <div class="options">
+                    <label><input type="radio" name="q7" value="A"> A. All major components and connections</label>
+                    <label><input type="radio" name="q7" value="B"> B. Only the router</label>
+                    <label><input type="radio" name="q7" value="C"> C. Just the WiFi password</label>
+                    <label><input type="radio" name="q7" value="D"> D. Only the computers</label>
+                </div>
+            </div>
+
+            <!-- Bonus Question -->
+            <div class="bonus-question">
+                <h3>Bonus Question</h3>
+                <h4>Design a simple network for a small office with 5 computers, 1 printer, and internet access. List the hardware you would need:</h4>
+                <p class="question-cn">bonus题：为有5台电脑、1台打印机和互联网接入的小型办公室设计一个简单网络。列出你需要的硬件：</p>
+                <textarea name="bonus" rows="5" placeholder="List the hardware needed for your office network design..."></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">Submit Quiz | 提交测验</button>
+        </form>
+
+        <div id="result" class="result hidden"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

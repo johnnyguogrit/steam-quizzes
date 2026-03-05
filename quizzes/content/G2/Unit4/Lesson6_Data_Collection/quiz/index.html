@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 6 Quiz - Data Collection</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="quiz-header">
+            <h1>Lesson 6 Quiz: Data Collection</h1>
+            <h2>第六课测验：数据收集</h2>
+            <p>Unit 4: Data and Spreadsheets | 第四单元：数据与电子表格</p>
+        </div>
+
+        <div class="quiz-container">
+            <!-- Question 1 -->
+            <div class="question" id="q1">
+                <p class="question-text">
+                    How many tally marks does this represent? <span class="tally">||||</span><br>
+                    这些计数符号代表多少？
+                </p>
+                <div class="options">
+                    <button class="option-btn" onclick="selectAnswer(1, 'A')">A. Three / 3</button>
+                    <button class="option-btn" onclick="selectAnswer(1, 'B')">B. Four / 4</button>
+                    <button class="option-btn" onclick="selectAnswer(1, 'C')">C. Five / 5</button>
+                    <button class="option-btn" onclick="selectAnswer(1, 'D')">D. Six / 6</button>
+                </div>
+                <div class="feedback" id="feedback1"></div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="question" id="q2">
+                <p class="question-text">
+                    How do we write "5" using tally marks?<br>
+                    用计数符号怎么写"5"？
+                </p>
+                <div class="options">
+                    <button class="option-btn" onclick="selectAnswer(2, 'A')">A. |||| / Four marks</button>
+                    <button class="option-btn" onclick="selectAnswer(2, 'B')">B. |||| / Five separate marks</button>
+                    <button class="option-btn" onclick="selectAnswer(2, 'C')">C. |||| / Diagonal crosses out four</button>
+                    <button class="option-btn" onclick="selectAnswer(2, 'D')">D. |||||| / Six marks</button>
+                </div>
+                <div class="feedback" id="feedback2"></div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="question" id="q3">
+                <p class="question-text">
+                    What is a survey?<br>
+                    什么是调查？
+                </p>
+                <div class="options">
+                    <button class="option-btn" onclick="selectAnswer(3, 'A')">A. A test in school / 考试</button>
+                    <button class="option-btn" onclick="selectAnswer(3, 'B')">B. Asking questions to collect information / 问问题来收集信息</button>
+                    <button class="option-btn" onclick="selectAnswer(3, 'C')">C. A drawing / 画画</button>
+                    <button class="option-btn" onclick="selectAnswer(3, 'D')">D. A game / 游戏</button>
+                </div>
+                <div class="feedback" id="feedback3"></div>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="question" id="q4">
+                <p class="question-text">
+                    What do we use tally marks for?<br>
+                    我们用计数符号来做什么？
+                </p>
+                <div class="options">
+                    <button class="option-btn" onclick="selectAnswer(4, 'A')">A. To draw pictures / 画画</button>
+                    <button class="option-btn" onclick="selectAnswer(4, 'B')">B. To count and record data quickly / 快速计数和记录数据</button>
+                    <button class="option-btn" onclick="selectAnswer(4, 'C')">C. To write letters / 写字</button>
+                    <button class="option-btn" onclick="selectAnswer(4, 'D')">D. To make music / 制作音乐</button>
+                </div>
+                <div class="feedback" id="feedback4"></div>
+            </div>
+
+            <!-- Question 5 -->
+            <div class="question" id="q5">
+                <p class="question-text">
+                    What is the first step of data collection?<br>
+                    数据收集的第一步是什么？
+                </p>
+                <div class="options">
+                    <button class="option-btn" onclick="selectAnswer(5, 'A')">A. Prepare your survey sheet / 准备你的调查表</button>
+                    <button class="option-btn" onclick="selectAnswer(5, 'B')">B. Say thank you / 说谢谢</button>
+                    <button class="option-btn" onclick="selectAnswer(5, 'C')">C. Calculate totals / 计算总数</button>
+                </div>
+                <div class="feedback" id="feedback5"></div>
+            </div>
+        </div>
+
+        <div class="score-container">
+            <div class="score">
+                <span>Score / 得分: </span>
+                <span id="currentScore">0</span> / 5
+            </div>
+            <button class="reset-btn" onclick="resetQuiz()">Try Again / 再试一次</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

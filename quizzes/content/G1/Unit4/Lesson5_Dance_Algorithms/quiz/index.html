@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dance Algorithms Quiz - G1 STEAM</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="title">💃 Dance Algorithms Quiz!</h1>
+            <p class="subtitle">Can you dance like a robot?</p>
+        </header>
+
+        <section class="intro">
+            <h2>Today we learned about Dance Algorithms! Let's review:</h2>
+            <ul class="key-points">
+                <li>Dance moves can be broken into steps</li>
+                <li>Symbols can represent dance moves</li>
+                <li>We can write algorithms for dance</li>
+            </ul>
+        </section>
+
+        <form id="quizForm">
+            <section class="question q1" style="background: #FFF9C4; border-left-color: #FBC02D;">
+                <h3>Question 1: What symbol means SPIN (turn around)?</h3>
+                <p class="chinese">哪个符号代表转圈？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q1" value="wrong">
+                        <span>A) ↑</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="correct">
+                        <span>B) ○</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="wrong">
+                        <span>C) ▽</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback1"></div>
+            </section>
+            <section class="question q2" style="background: #F3E5F5; border-left-color: #AB47BC;">
+                <h3>Question 2: What does ↑↑ ↔ mean?</h3>
+                <p class="chinese">↑↑ ↔ 是什么意思？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q2" value="wrong">
+                        <span>A) Spin, spin, wave</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="correct">
+                        <span>B) Jump, jump, wave</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="wrong">
+                        <span>C) Stomp, stomp, bend</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback2"></div>
+            </section>
+            <section class="question q3" style="background: #FFE0B2; border-left-color: #FF9800;">
+                <h3>Question 3: Why must robots follow dance steps EXACTLY?</h3>
+                <p class="chinese">为什么机器人必须完全按照舞步做？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q3" value="wrong">
+                        <span>A) They can guess what to do</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="correct">
+                        <span>B) Precision matters in algorithms</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="wrong">
+                        <span>C) They like to dance their way</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback3"></div>
+            </section>
+            <section class="question q4" style="background: #B2EBF2; border-left-color: #00BCD4;">
+                <h3>Question 4: What symbol means STOMP?</h3>
+                <p class="chinese">哪个符号代表踏步？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q4" value="wrong">
+                        <span>A) ～</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="correct">
+                        <span>B) ▽</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="wrong">
+                        <span>C) ↔</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback4"></div>
+            </section>
+            <section class="bonus">
+                <h3>⭐ BONUS: Create a Dance Algorithm!</h3>
+                <p>Write a dance algorithm using symbols (○ ↑ ↔ ▽ ～):</p>
+                <textarea id="bonusAnswer" placeholder="Your dance: ○ ○ ↑ ↔ ▽ ▽ ～&#10;What it means: ..."></textarea>
+            </section>
+
+            <div class="buttons">
+                <button type="button" class="btn btn-primary" onclick="checkAnswers()">
+                    Check Answers! ✅
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resetQuiz()" id="retryBtn" style="display: none;">
+                    Try Again! 🔄
+                </button>
+            </div>
+        </form>
+
+        <div class="results" id="results" style="display: none;">
+            <h2>🎉 How did you do?</h2>
+            <div class="score-display">
+                <p id="scoreText"></p>
+                <div class="stars" id="starsDisplay"></div>
+            </div>
+            <div class="message" id="finalMessage"></div>
+        </div>
+
+        <footer>
+            G1 STEAM - Unit 4 Lesson 5: Dance Algorithms | Spring 2026
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dance Project Quiz - G1 STEAM</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="title">💃 Dance Project Quiz!</h1>
+            <p class="subtitle">Let's review what we learned!</p>
+        </header>
+
+        <section class="intro">
+            <h2>Today we learned about Dance Projects & Debugging! Let's review:</h2>
+            <ul class="key-points">
+                <li>Create complete dances in ScratchJr</li>
+                <li>Use repeat blocks for dance sequences</li>
+                <li>Add sounds and backgrounds</li>
+                <li>Debug and fix mistakes</li>
+            </ul>
+        </section>
+
+        <form id="quizForm">
+            <section class="question q1" style="background: #FFF9C4; border-left-color: #FBC02D;">
+                <h3>Question 1: What is a CHOREOGRAPHER?</h3>
+                <p class="chinese">什么是舞蹈编导？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q1" value="wrong">
+                        <span>A) A person who watches dances</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="correct">
+                        <span>B) A person who creates dances</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="wrong">
+                        <span>C) A person who dances</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback1"></div>
+            </section>
+            <section class="question q2" style="background: #F3E5F5; border-left-color: #AB47BC;">
+                <h3>Question 2: What MUST your dance project have?</h3>
+                <p class="chinese">舞蹈项目必须有什么？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q2" value="wrong">
+                        <span>A) Only one move</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="correct">
+                        <span>B) At least 2 dance sequences</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="wrong">
+                        <span>C) No sounds</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback2"></div>
+            </section>
+            <section class="question q3" style="background: #FFE0B2; border-left-color: #FF9800;">
+                <h3>Question 3: What color are the SOUND effect blocks?</h3>
+                <p class="chinese">音效积木是什么颜色的？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q3" value="correct">
+                        <span>A) Blue</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="wrong">
+                        <span>B) Red</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="wrong">
+                        <span>C) Yellow</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback3"></div>
+            </section>
+            <section class="question q4" style="background: #B2EBF2; border-left-color: #00BCD4;">
+                <h3>Question 4: If nothing happens when you tap, what should you check?</h3>
+                <p class="chinese">如果点击后没反应，应该检查什么？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q4" value="wrong">
+                        <span>A) Check the background</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="correct">
+                        <span>B) Check the triggering block</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="wrong">
+                        <span>C) Check the sounds</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback4"></div>
+            </section>
+            <section class="bonus">
+                <h3>⭐ BONUS: Plan Your Dance!</h3>
+                <p>Write your dance plan with 3 moves that you would repeat:</p>
+                <textarea id="bonusAnswer" placeholder="Repeat 3 times: [Jump, Spin, Wave]"></textarea>
+            </section>
+
+            <div class="buttons">
+                <button type="button" class="btn btn-primary" onclick="checkAnswers()">
+                    Check Answers! ✅
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resetQuiz()" id="retryBtn" style="display: none;">
+                    Try Again! 🔄
+                </button>
+            </div>
+        </form>
+
+        <div class="results" id="results" style="display: none;">
+            <h2>🎉 How did you do?</h2>
+            <div class="score-display">
+                <p id="scoreText"></p>
+                <div class="stars" id="starsDisplay"></div>
+            </div>
+            <div class="message" id="finalMessage"></div>
+        </div>
+
+        <footer>
+            G1 STEAM - Unit 4 Lesson 8: Dance Project | Spring 2026
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

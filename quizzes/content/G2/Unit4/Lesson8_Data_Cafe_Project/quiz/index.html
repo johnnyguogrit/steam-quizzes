@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 8 Quiz - Data Cafe Project</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="quiz-header">
+            <h1>Lesson 8 Quiz: Data Cafe Project</h1>
+            <h2>第八课测验：数据咖啡馆项目</h2>
+            <p>Unit 4: Data and Spreadsheets | 第四单元：数据与电子表格</p>
+        </div>
+
+        <div class="quiz-container">
+            <!-- Question 1 -->
+            <div class="question" id="q1">
+                <p class="question-text">
+                    What is the Data Cafe Project about?<br>
+                    数据咖啡馆项目是关于什么的？
+                </p>
+                <div class="options">
+                    <button class="option-btn" onclick="selectAnswer(1, 'A')">A. Making real food / 做真正的食物</button>
+                    <button class="option-btn" onclick="selectAnswer(1, 'B')">B. Designing a menu and collecting data about favorite foods / 设计菜单并收集关于最喜欢的食物的数据</button>
+                    <button class="option-btn" onclick="selectAnswer(1, 'C')">C. Building a real cafe / 建造真正的咖啡馆</button>
+                    <button class="option-btn" onclick="selectAnswer(1, 'D')">D. Cooking lessons / 烹饪课</button>
+                </div>
+                <div class="feedback" id="feedback1"></div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="question" id="q2">
+                <p class="question-text">
+                    What do we put on a cafe menu?<br>
+                    我们在咖啡馆菜单上放什么？
+                </p>
+                <div class="options">
+                    <button class="option-btn" onclick="selectAnswer(2, 'A')">A. Only drinks / 只有饮料</button>
+                    <button class="option-btn" onclick="selectAnswer(2, 'B')">B. Food and drink items with prices / 食物和饮料项目及其价格</button>
+                    <button class="option-btn" onclick="selectAnswer(2, 'C')">C. Only pictures / 只有图片</button>
+                    <button class="option-btn" onclick="selectAnswer(2, 'D')">D. Games / 游戏</button>
+                </div>
+                <div class="feedback" id="feedback2"></div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="question" id="q3">
+                <p class="question-text">
+                    What do we do at the end of the Data Cafe Project?<br>
+                    在数据咖啡馆项目的最后我们要做什么？
+                </p>
+                <div class="options">
+                    <button class="option-btn" onclick="selectAnswer(3, 'A')">A. Go home / 回家</button>
+                    <button class="option-btn" onclick="selectAnswer(3, 'B')">B. Present our menu and data to the class / 向全班展示我们的菜单和数据</button>
+                    <button class="option-btn" onclick="selectAnswer(3, 'C')">C. Sleep / 睡觉</button>
+                    <button class="option-btn" onclick="selectAnswer(3, 'D')">D. Eat food / 吃食物</button>
+                </div>
+                <div class="feedback" id="feedback3"></div>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="question" id="q4">
+                <p class="question-text">
+                    What tool do we use to organize our cafe data?<br>
+                    我们用什么工具来组织咖啡馆的数据？
+                </p>
+                <div class="options">
+                    <button class="option-btn" onclick="selectAnswer(4, 'A')">A. A pencil / 铅笔</button>
+                    <button class="option-btn" onclick="selectAnswer(4, 'B')">B. A spreadsheet / 电子表格</button>
+                    <button class="option-btn" onclick="selectAnswer(4, 'C')">C. A ruler / 尺子</button>
+                    <button class="option-btn" onclick="selectAnswer(4, 'D')">D. A calculator / 计算器</button>
+                </div>
+                <div class="feedback" id="feedback4"></div>
+            </div>
+
+            <!-- Question 5 -->
+            <div class="question" id="q5">
+                <p class="question-text">
+                    What should you consider when setting menu prices?<br>
+                    设置菜单价格时应该考虑什么？
+                </p>
+                <div class="options">
+                    <button class="option-btn" onclick="selectAnswer(5, 'A')">A. Make everything free / 一切都免费</button>
+                    <button class="option-btn" onclick="selectAnswer(5, 'B')">B. Prices should be reasonable / 价格应该合理</button>
+                    <button class="option-btn" onclick="selectAnswer(5, 'C')">C. Use random numbers / 使用随机数字</button>
+                </div>
+                <div class="feedback" id="feedback5"></div>
+            </div>
+        </div>
+
+        <div class="score-container">
+            <div class="score">
+                <span>Score / 得分: </span>
+                <span id="currentScore">0</span> / 5
+            </div>
+            <button class="reset-btn" onclick="resetQuiz()">Try Again / 再试一次</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

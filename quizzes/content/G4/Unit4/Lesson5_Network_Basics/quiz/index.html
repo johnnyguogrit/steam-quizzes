@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 5 Quiz - Network Basics</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Lesson 5 Quiz: Network Basics</h1>
+            <h2>第五课测验：网络基础</h2>
+        </header>
+
+        <form id="quizForm" class="quiz-form">
+            <!-- Question 1 -->
+            <div class="question">
+                <h3>Q1. What is a computer network?</h3>
+                <p class="question-cn">Q1. 什么是计算机网络？</p>
+                <div class="options">
+                    <label><input type="radio" name="q1" value="A"> A. Two or more computers connected together to share resources and information</label>
+                    <label><input type="radio" name="q1" value="B"> B. A single computer with many programs</label>
+                    <label><input type="radio" name="q1" value="C"> C. The internet only</label>
+                    <label><input type="radio" name="q1" value="D"> D. A type of computer game</label>
+                </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="question">
+                <h3>Q2. What does LAN stand for?</h3>
+                <p class="question-cn">Q2. LAN代表什么？</p>
+                <div class="options">
+                    <label><input type="radio" name="q2" value="A"> A. Large Area Network</label>
+                    <label><input type="radio" name="q2" value="B"> B. Local Area Network</label>
+                    <label><input type="radio" name="q2" value="C"> C. Long Access Node</label>
+                    <label><input type="radio" name="q2" value="D"> D. Line And Network</label>
+                </div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="question">
+                <h3>Q3. Which network type covers the largest area?</h3>
+                <p class="question-cn">Q3. 哪种网络类型覆盖的面积最大？</p>
+                <div class="options">
+                    <label><input type="radio" name="q3" value="A"> A. PAN (Personal Area Network)</label>
+                    <label><input type="radio" name="q3" value="B"> B. LAN (Local Area Network)</label>
+                    <label><input type="radio" name="q3" value="C"> C. WAN (Wide Area Network)</label>
+                    <label><input type="radio" name="q3" value="D"> D. MAN (Metro Area Network)</label>
+                </div>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="question">
+                <h3>Q4. What is a router?</h3>
+                <p class="question-cn">Q4. 路由器是什么？</p>
+                <div class="options">
+                    <label><input type="radio" name="q4" value="A"> A. A type of computer virus</label>
+                    <label><input type="radio" name="q4" value="B"> B. The traffic director of a network</label>
+                    <label><input type="radio" name="q4" value="C"> C. A gaming device</label>
+                    <label><input type="radio" name="q4" value="D"> D. A type of cable</label>
+                </div>
+            </div>
+
+            <!-- Question 5 -->
+            <div class="question">
+                <h3>Q5. When data travels on a network, it breaks into small pieces called:</h3>
+                <p class="question-cn">Q5. 当数据在网络上传送时，它会分成称为_____的小片段：</p>
+                <div class="options">
+                    <label><input type="radio" name="q5" value="A"> A. Bits</label>
+                    <label><input type="radio" name="q5" value="B"> B. Packets</label>
+                    <label><input type="radio" name="q5" value="C"> C. Chunks</label>
+                    <label><input type="radio" name="q5" value="D"> D. Bytes</label>
+                </div>
+            </div>
+
+            <!-- Question 6 -->
+            <div class="question">
+                <h3>Q6. Which connection type is the fastest?</h3>
+                <p class="question-cn">Q6. 哪种连接类型最快？</p>
+                <div class="options">
+                    <label><input type="radio" name="q6" value="A"> A. WiFi</label>
+                    <label><input type="radio" name="q6" value="B"> B. Mobile (4G/5G)</label>
+                    <label><input type="radio" name="q6" value="C"> C. Wired (Ethernet cable)</label>
+                    <label><input type="radio" name="q6" value="D"> D. Bluetooth</label>
+                </div>
+            </div>
+
+            <!-- Question 7 -->
+            <div class="question">
+                <h3>Q7. What is a server?</h3>
+                <p class="question-cn">Q7. 什么是服务器？</p>
+                <div class="options">
+                    <label><input type="radio" name="q7" value="A"> A. A person who serves food</label>
+                    <label><input type="radio" name="q7" value="B"> B. A powerful computer that stores and provides information</label>
+                    <label><input type="radio" name="q7" value="C"> C. A type of cable</label>
+                    <label><input type="radio" name="q7" value="D"> D. A WiFi password</label>
+                </div>
+            </div>
+
+            <!-- Bonus Question -->
+            <div class="bonus-question">
+                <h3>Bonus Question</h3>
+                <h4>Draw a simple diagram of your home network. Label at least 3 devices.</h4>
+                <p class="question-cn">bonus题：画出你家庭网络的简单示意图。至少标出3个设备。</p>
+                <textarea name="bonus" rows="5" placeholder="Describe or draw your home network here..."></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">Submit Quiz | 提交测验</button>
+        </form>
+
+        <div id="result" class="result hidden"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repetition Quiz - G1 STEAM</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="title">🔄 Repetition Quiz!</h1>
+            <p class="subtitle">Let's make code shorter!</p>
+        </header>
+
+        <section class="intro">
+            <h2>Today we learned about Repetition! Let's review:</h2>
+            <ul class="key-points">
+                <li>Orange repeat blocks save time</li>
+                <li>Repeat blocks make code shorter</li>
+                <li>Code inside the repeat repeats</li>
+            </ul>
+        </section>
+
+        <form id="quizForm">
+            <section class="question q1" style="background: #FFF9C4; border-left-color: #FBC02D;">
+                <h3>Question 1: What COLOR are the REPEAT blocks?</h3>
+                <p class="chinese">重复块是什么颜色的？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q1" value="wrong">
+                        <span>A) Blue</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="correct">
+                        <span>B) Orange</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="wrong">
+                        <span>C) Green</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback1"></div>
+            </section>
+            <section class="question q2" style="background: #F3E5F5; border-left-color: #AB47BC;">
+                <h3>Question 2: Why do we use repeat blocks?</h3>
+                <p class="chinese">为什么我们使用重复块？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q2" value="wrong">
+                        <span>A) To make code longer</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="correct">
+                        <span>B) To make code shorter</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="wrong">
+                        <span>C) Because orange is pretty</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback2"></div>
+            </section>
+            <section class="question q3" style="background: #FFE0B2; border-left-color: #FF9800;">
+                <h3>Question 3: If repeat says "3 times", how many times does it run?</h3>
+                <p class="chinese">如果重复块说"3次"，它会运行几次？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q3" value="wrong">
+                        <span>A) 2 times</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="correct">
+                        <span>B) 3 times</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="wrong">
+                        <span>C) Forever</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback3"></div>
+            </section>
+            <section class="question q4" style="background: #B2EBF2; border-left-color: #00BCD4;">
+                <h3>Question 3: What blocks go INSIDE the repeat block?</h3>
+                <p class="chinese">什么块放在重复块里面？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q4" value="wrong">
+                        <span>A) Nothing goes inside</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="correct">
+                        <span>B) The blocks to repeat</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="wrong">
+                        <span>C) All blocks</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback4"></div>
+            </section>
+            <section class="bonus">
+                <h3>⭐ BONUS: Use Repeat!</h3>
+                <p>Write an algorithm where you jump 5 times using a repeat block:</p>
+                <textarea id="bonusAnswer" placeholder="Repeat 5 times: [jump block]"></textarea>
+            </section>
+
+            <div class="buttons">
+                <button type="button" class="btn btn-primary" onclick="checkAnswers()">
+                    Check Answers! ✅
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resetQuiz()" id="retryBtn" style="display: none;">
+                    Try Again! 🔄
+                </button>
+            </div>
+        </form>
+
+        <div class="results" id="results" style="display: none;">
+            <h2>🎉 How did you do?</h2>
+            <div class="score-display">
+                <p id="scoreText"></p>
+                <div class="stars" id="starsDisplay"></div>
+            </div>
+            <div class="message" id="finalMessage"></div>
+        </div>
+
+        <footer>
+            G1 STEAM - Unit 4 Lesson 7: Repetition | Spring 2026
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introduction to Codes Quiz - G2 STEAM</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="title">🕵️ Introduction to Codes Quiz!</h1>
+            <p class="subtitle">Let's see what you learned about secret codes!</p>
+        </header>
+
+        <section class="intro">
+            <h2>Today we learned about Secret Codes! Let's review:</h2>
+            <ul class="key-points">
+                <li>Codes are everywhere - barcodes, QR codes, passwords</li>
+                <li>Encoding turns messages into secret codes</li>
+                <li>Decoding turns codes back into messages</li>
+                <li>Number codes replace letters with numbers</li>
+            </ul>
+        </section>
+
+        <form id="quizForm">
+            <section class="question q1" style="background: #FFF9C4; border-left-color: #FBC02D;">
+                <h3>Question 1: What is ENCODING?</h3>
+                <p class="chinese">什么是编码？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q1" value="correct">
+                        <span>A) Turning information into secret code</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="wrong">
+                        <span>B) Turning code into information</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="wrong">
+                        <span>C) Breaking a secret code</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback1"></div>
+            </section>
+            <section class="question q2" style="background: #F3E5F5; border-left-color: #AB47BC;">
+                <h3>Question 2: In the number code, what letter is "5"?</h3>
+                <p class="chinese">在数字密码中，"5"代表哪个字母？(A=1, B=2...)</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q2" value="wrong">
+                        <span>A) D</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="correct">
+                        <span>B) E</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="wrong">
+                        <span>C) F</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback2"></div>
+            </section>
+            <section class="question q3" style="background: #FFE0B2; border-left-color: #FF9800;">
+                <h3>Question 3: What is a CAESAR CIPHER?</h3>
+                <p class="chinese">什么是凯撒密码？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q3" value="wrong">
+                        <span>A) A code using only 0 and 1</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="correct">
+                        <span>B) A shift code that moves letters</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="wrong">
+                        <span>C) A code using pictures</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback3"></div>
+            </section>
+            <section class="question q4" style="background: #B2EBF2; border-left-color: #00BCD4;">
+                <h3>Question 4: In a shift code (+1), what does "A" become?</h3>
+                <p class="chinese">在移位密码(+1)中，"A"会变成什么？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q4" value="correct">
+                        <span>A) B</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="wrong">
+                        <span>B) C</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="wrong">
+                        <span>C) A</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback4"></div>
+            </section>
+            <section class="question q5" style="background: #C8E6C9; border-left-color: #4CAF50;">
+                <h3>Question 5: What does DECODING mean?</h3>
+                <p class="chinese">什么是解码？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q5" value="wrong">
+                        <span>A) Turning information into secret code</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="correct">
+                        <span>B) Turning secret code back into information</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="wrong">
+                        <span>C) Breaking a computer</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback5"></div>
+            </section>
+            <section class="bonus">
+                <h3>⭐ BONUS: Be a Code Creator!</h3>
+                <p>Write your name using the number code (A=1, B=2, C=3...):</p>
+                <textarea id="bonusAnswer" placeholder="Example: CAT = 3-1-20"></textarea>
+            </section>
+
+            <div class="buttons">
+                <button type="button" class="btn btn-primary" onclick="checkAnswers()">
+                    Check Answers! ✅
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resetQuiz()" id="retryBtn" style="display: none;">
+                    Try Again! 🔄
+                </button>
+            </div>
+        </form>
+
+        <div class="results" id="results" style="display: none;">
+            <h2>🎉 How did you do?</h2>
+            <div class="score-display">
+                <p id="scoreText"></p>
+                <div class="stars" id="starsDisplay"></div>
+            </div>
+            <div class="message" id="finalMessage"></div>
+        </div>
+
+        <footer>
+            G2 STEAM - Unit 3 Lesson 1: Introduction to Codes | Spring 2026
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

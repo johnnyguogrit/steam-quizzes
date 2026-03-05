@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScratchJr Intro Quiz - G1 STEAM</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="title">🐱 ScratchJr Quiz!</h1>
+            <p class="subtitle">Let's learn to code with the cat!</p>
+        </header>
+
+        <section class="intro">
+            <h2>Today we learned about ScratchJr! Let's review:</h2>
+            <ul class="key-points">
+                <li>ScratchJr is a coding app for kids</li>
+                <li>Blue blocks make characters move</li>
+                <li>The green flag starts our program</li>
+            </ul>
+        </section>
+
+        <form id="quizForm">
+            <section class="question q1" style="background: #FFF9C4; border-left-color: #FBC02D;">
+                <h3>Question 1: What color are the MOTION blocks?</h3>
+                <p class="chinese">动作块是什么颜色的？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q1" value="wrong">
+                        <span>A) Red</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="correct">
+                        <span>B) Blue</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="wrong">
+                        <span>C) Green</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback1"></div>
+            </section>
+            <section class="question q2" style="background: #F3E5F5; border-left-color: #AB47BC;">
+                <h3>Question 2: What does the green FLAG block do?</h3>
+                <p class="chinese">绿色旗帜块是做什么的？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q2" value="wrong">
+                        <span>A) Makes the cat disappear</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="correct">
+                        <span>B) Starts the program</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="wrong">
+                        <span>C) Stops the program</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback2"></div>
+            </section>
+            <section class="question q3" style="background: #FFE0B2; border-left-color: #FF9800;">
+                <h3>Question 3: Does the ORDER of blocks matter?</h3>
+                <p class="chinese">积木的顺序重要吗？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q3" value="wrong">
+                        <span>A) No, order doesn't matter</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="correct">
+                        <span>B) Yes, blocks run in order</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="wrong">
+                        <span>C) Only sometimes</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback3"></div>
+            </section>
+            <section class="question q4" style="background: #B2EBF2; border-left-color: #00BCD4;">
+                <h3>Question 4: Where do we put the blocks?</h3>
+                <p class="chinese">我们把积木放在哪里？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q4" value="wrong">
+                        <span>A) On the stage</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="correct">
+                        <span>B) In the programming area</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="wrong">
+                        <span>C) In the trash</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback4"></div>
+            </section>
+            <section class="bonus">
+                <h3>⭐ BONUS: Design a Program!</h3>
+                <p>Describe what blocks you would use to make the cat jump 3 times:</p>
+                <textarea id="bonusAnswer" placeholder="I would use the green flag block, then..."></textarea>
+            </section>
+
+            <div class="buttons">
+                <button type="button" class="btn btn-primary" onclick="checkAnswers()">
+                    Check Answers! ✅
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resetQuiz()" id="retryBtn" style="display: none;">
+                    Try Again! 🔄
+                </button>
+            </div>
+        </form>
+
+        <div class="results" id="results" style="display: none;">
+            <h2>🎉 How did you do?</h2>
+            <div class="score-display">
+                <p id="scoreText"></p>
+                <div class="stars" id="starsDisplay"></div>
+            </div>
+            <div class="message" id="finalMessage"></div>
+        </div>
+
+        <footer>
+            G1 STEAM - Unit 4 Lesson 6: ScratchJr Intro | Spring 2026
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

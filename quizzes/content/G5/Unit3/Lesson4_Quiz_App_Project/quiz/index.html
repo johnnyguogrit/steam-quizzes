@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App Project Quiz - G5 STEAM</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="title">Quiz App Project Quiz!</h1>
+            <p class="subtitle">/ Build Your Own Quiz Game!</p>
+        </header>
+
+        <section class="intro">
+            <h2>Today we learned about Building a Quiz App! Let's review:</h2>
+            <ul class="key-points">
+                <li>Plan your quiz structure and design questions</li>
+                <li>Build with scoring and feedback systems</li>
+                <li>Test your quiz with classmates</li>
+                <li>Present your completed quiz app</li>
+            </ul>
+        </section>
+
+        <form id="quizForm">
+            <section class="question q1" style="background: #F3E5F5; border-left-color: #8E24AA;">
+                <h3>Question 1: What is the FIRST step in building a quiz app?</h3>
+                <p class="chinese">构建测验应用的第一步是什么？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q1" value="A">
+                        <span>A) Choose your topic</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="B">
+                        <span>B) Write all the code</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="C">
+                        <span>C) Test with friends</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="D">
+                        <span>D) Add colors</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback1"></div>
+            </section>
+
+            <section class="question q2" style="background: #E3F2FD; border-left-color: #1976D2;">
+                <h3>Question 2: How many questions should your quiz app have at minimum?</h3>
+                <p class="chinese">你的测验应用至少应该有多少个问题？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q2" value="A">
+                        <span>A) 1 question</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="B">
+                        <span>B) 5 questions</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="C">
+                        <span>C) 10 questions</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="D">
+                        <span>D) 100 questions</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback2"></div>
+            </section>
+
+            <section class="question q3" style="background: #FFF9C4; border-left-color: #F57C00;">
+                <h3>Question 3: What should all quiz questions have in common?</h3>
+                <p class="chinese">所有测验问题应该有什么共同点？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q3" value="A">
+                        <span>A) They should be about ONE topic</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="B">
+                        <span>B) They should be very hard</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="C">
+                        <span>C) They should be random</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="D">
+                        <span>D) They should be about different topics</span>
+                    </div>
+                </div>
+                <div class="feedback" id="feedback3"></div>
+            </section>
+
+            <section class="question q4" style="background: #E8EAF6; border-left-color: #3F51B5;">
+                <h3>Question 4: What type of answers work best for quiz apps?</h3>
+                <p class="chinese">哪种类型的答案最适合测验应用？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q4" value="A">
+                        <span>A) Essay questions</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="B">
+                        <span>B) Multiple choice (A, B, C, D)</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="C">
+                        <span>C) No answers</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="D">
+                        <span>D) Only one option</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback4"></div>
+            </section>
+
+            <section class="question q5" style="background: #FFEBEE; border-left-color: #E53935;">
+                <h3>Question 5: What is the purpose of testing your quiz?</h3>
+                <p class="chinese">测试你的测验的目的是什么？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q5" value="A">
+                        <span>A) To find bugs and fix problems</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="B">
+                        <span>B) To waste time</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="C">
+                        <span>C) To make it harder</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="D">
+                        <span>D) To delete questions</span>
+                    </div>
+                </div>
+                <div class="feedback" id="feedback5"></div>
+            </section>
+
+            <section class="question q6" style="background: #E0F2F1; border-left-color: #00796B;">
+                <h3>Question 6: What should you include in your quiz for players?</h3>
+                <p class="chinese">你应该在测验中为玩家包含什么？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q6" value="A">
+                        <span>A) Only questions</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q6" value="B">
+                        <span>B) Clear instructions</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q6" value="C">
+                        <span>C) Hidden tricks</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q6" value="D">
+                        <span>D) Nothing</span>
+                    </div>
+                </div>
+                <div class="feedback" id="feedback6"></div>
+            </section>
+
+            <section class="question q7" style="background: #FBE9E7; border-left-color: #D84315;">
+                <h3>Question 7: What is peer testing?</h3>
+                <p class="chinese">什么是同伴测试？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q7" value="A">
+                        <span>A) Testing by yourself</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q7" value="B">
+                        <span>B) Having classmates test your quiz</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q7" value="C">
+                        <span>C) Using a computer</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q7" value="D">
+                        <span>D) Skipping testing</span>
+                    </div>
+                </div>
+                <div class="feedback" id="feedback7"></div>
+            </section>
+
+            <section class="question q8" style="background: #E1F5FE; border-left-color: #0277BD;">
+                <h3>Question 8: What should good feedback include?</h3>
+                <p class="chinese">好的反馈应该包含什么？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q8" value="A">
+                        <span>A) Only complaints</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q8" value="B">
+                        <span>B) Compliments and suggestions</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q8" value="C">
+                        <span>C) Nothing helpful</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q8" value="D">
+                        <span>D) Only praise</span>
+                    </div>
+                </div>
+                <div class="feedback" id="feedback8"></div>
+            </section>
+
+            <section class="bonus">
+                <h3>⭐ BONUS: Design Your Own Question!</h3>
+                <p>Create a specific, clear quiz question about building quiz apps:</p>
+                <textarea id="bonusAnswer" placeholder="Write your quiz question here with 4 answer choices (A, B, C, D)..."></textarea>
+            </section>
+
+            <div class="buttons">
+                <button type="button" class="btn btn-primary" onclick="checkAnswers()">
+                    Check Answers!
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resetQuiz()" id="retryBtn" style="display: none;">
+                    Try Again!
+                </button>
+            </div>
+        </form>
+
+        <div class="results" id="results" style="display: none;">
+            <h2>How did you do?</h2>
+            <div class="score-display">
+                <p id="scoreText"></p>
+                <div class="stars" id="starsDisplay"></div>
+            </div>
+            <div class="message" id="finalMessage"></div>
+        </div>
+
+        <footer>
+            G5 STEAM - Unit 3 Lesson 4: Quiz App Project | Spring 2026
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

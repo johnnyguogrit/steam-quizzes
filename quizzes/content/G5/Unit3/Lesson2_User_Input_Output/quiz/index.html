@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Input and Output Quiz - G5 STEAM</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="title">User Input and Output Quiz!</h1>
+            <p class="subtitle">/ How Computers Talk to Us!</p>
+        </header>
+
+        <section class="intro">
+            <h2>Today we learned about Input and Output! Let's review:</h2>
+            <ul class="key-points">
+                <li>INPUT = Information going INTO the computer</li>
+                <li>OUTPUT = Information coming OUT of the computer</li>
+                <li>Quiz apps use input to get answers</li>
+                <li>Quiz apps use output to give feedback</li>
+            </ul>
+        </section>
+
+        <form id="quizForm">
+            <section class="question q1" style="background: #E1F5FE; border-left-color: #039BE5;">
+                <h3>Question 1: What is INPUT in computing?</h3>
+                <p class="chinese">什么是计算中的输入？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q1" value="A">
+                        <span>A) Information going INTO the computer</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="B">
+                        <span>B) Information coming OUT of the computer</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="C">
+                        <span>C) Turning off the computer</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="D">
+                        <span>D) The computer screen</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback1"></div>
+            </section>
+
+            <section class="question q2" style="background: #F3E5F5; border-left-color: #8E24AA;">
+                <h3>Question 2: Which is an example of INPUT?</h3>
+                <p class="chinese">哪一个是输入的例子？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q2" value="A">
+                        <span>A) Text on a screen</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="B">
+                        <span>B) Pressing a key on keyboard</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="C">
+                        <span>C) Sound from speakers</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="D">
+                        <span>D) Video on monitor</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback2"></div>
+            </section>
+
+            <section class="question q3" style="background: #E0F2F1; border-left-color: #00897B;">
+                <h3>Question 3: What is OUTPUT in computing?</h3>
+                <p class="chinese">什么是计算中的输出？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q3" value="A">
+                        <span>A) Typing on the keyboard</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="B">
+                        <span>B) Clicking the mouse</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="C">
+                        <span>C) Information coming OUT of the computer</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="D">
+                        <span>D) Touching the screen</span>
+                    </div>
+                </div>
+                <div class="feedback" id="feedback3"></div>
+            </section>
+
+            <section class="question q4" style="background: #FFF3E0; border-left-color: #FB8C00;">
+                <h3>Question 4: In a quiz app, what is the player's answer choice?</h3>
+                <p class="chinese">在测验应用中，玩家的答案选择是什么？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q4" value="A">
+                        <span>A) Output</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="B">
+                        <span>B) Input</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="C">
+                        <span>C) Both input and output</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="D">
+                        <span>D) Neither input nor output</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback4"></div>
+            </section>
+
+            <section class="question q5" style="background: #FFEBEE; border-left-color: #E53935;">
+                <h3>Question 5: Which is an example of OUTPUT in a quiz?</h3>
+                <p class="chinese">哪一个是测验中输出的例子？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q5" value="A">
+                        <span>A) Clicking an answer button</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="B">
+                        <span>B) Showing "Correct!" or "Try again!"</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="C">
+                        <span>C) Pressing a key</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="D">
+                        <span>D) Touching the screen</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback5"></div>
+            </section>
+
+            <section class="question q6" style="background: #E8EAF6; border-left-color: #3F51B5;">
+                <h3>Question 6: What is the correct order of input-output flow?</h3>
+                <p class="chinese">输入-输出流的正确顺序是什么？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q6" value="A">
+                        <span>A) Output -> Check -> Input</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q6" value="B">
+                        <span>B) Input -> Check -> Output</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q6" value="C">
+                        <span>C) Check -> Input -> Output</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q6" value="D">
+                        <span>D) Output -> Input -> Check</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback6"></div>
+            </section>
+
+            <section class="question q7" style="background: #F1F8E9; border-left-color: #689F38;">
+                <h3>Question 7: Which is NOT a way to answer in a quiz app?</h3>
+                <p class="chinese">哪一种不是在测验应用中回答的方式？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q7" value="A">
+                        <span>A) Click a button</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q7" value="B">
+                        <span>B) Press a key</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q7" value="C">
+                        <span>C) Touch screen</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q7" value="D">
+                        <span>D) Shout at the computer</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback7"></div>
+            </section>
+
+            <section class="question q8" style="background: #FCE4EC; border-left-color: #D81B60;">
+                <h3>Question 8: What color shows a CORRECT answer in most quizzes?</h3>
+                <p class="chinese">大多数测验中什么颜色显示正确答案？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q8" value="A">
+                        <span>A) Red</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q8" value="B">
+                        <span>B) Blue</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q8" value="C">
+                        <span>C) Green</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q8" value="D">
+                        <span>D) Yellow</span>
+                    </div>
+                </div>
+                <div class="feedback" id="feedback8"></div>
+            </section>
+
+            <section class="bonus">
+                <h3>⭐ BONUS: Design Your Own Question!</h3>
+                <p>Create a specific, clear quiz question about input and output:</p>
+                <textarea id="bonusAnswer" placeholder="Write your quiz question here with 4 answer choices (A, B, C, D)..."></textarea>
+            </section>
+
+            <div class="buttons">
+                <button type="button" class="btn btn-primary" onclick="checkAnswers()">
+                    Check Answers!
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resetQuiz()" id="retryBtn" style="display: none;">
+                    Try Again!
+                </button>
+            </div>
+        </form>
+
+        <div class="results" id="results" style="display: none;">
+            <h2>How did you do?</h2>
+            <div class="score-display">
+                <p id="scoreText"></p>
+                <div class="stars" id="starsDisplay"></div>
+            </div>
+            <div class="message" id="finalMessage"></div>
+        </div>
+
+        <footer>
+            G5 STEAM - Unit 3 Lesson 2: User Input and Output | Spring 2026
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

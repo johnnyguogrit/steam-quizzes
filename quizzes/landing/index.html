@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STEAM Quiz Central! 🎮</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">🎓 STEAM Quiz Central! 🎮</h1>
+            <p class="subtitle">Choose your grade and test your knowledge!</p>
+        </header>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="🔍 Search by keyword, unit, or lesson..." />
+        </div>
+
+        <nav class="grade-tabs">
+            <button class="grade-tab g1 active" data-grade="g1">
+                <span class="grade-icon">🌟</span>
+                <span class="grade-label">G1</span>
+            </button>
+            <button class="grade-tab g2" data-grade="g2">
+                <span class="grade-icon">🌱</span>
+                <span class="grade-label">G2</span>
+            </button>
+            <button class="grade-tab g3" data-grade="g3">
+                <span class="grade-icon">🚀</span>
+                <span class="grade-label">G3</span>
+            </button>
+            <button class="grade-tab g4" data-grade="g4">
+                <span class="grade-icon">💎</span>
+                <span class="grade-label">G4</span>
+            </button>
+            <button class="grade-tab g5" data-grade="g5">
+                <span class="grade-icon">🏆</span>
+                <span class="grade-label">G5</span>
+            </button>
+        </nav>
+
+        <main class="quiz-grid" id="quizGrid">
+            <!-- Quiz cards will be populated by JavaScript -->
+        </main>
+
+        <div id="noResults" class="no-results" style="display: none;">
+            <p>🤔 No quizzes found. Try a different search!</p>
+        </div>
+
+        <footer class="footer">
+            <p>🌈 Spring 2026 STEAM Program | Happy Learning! 📚</p>
+        </footer>
+    </div>
+
+    <script src="quiz-data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

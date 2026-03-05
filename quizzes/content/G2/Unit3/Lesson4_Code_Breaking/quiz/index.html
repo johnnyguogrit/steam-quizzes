@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Breaking Quiz - G2 Unit 3 Lesson 4</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="title">🔓 Code Breaking Quiz</h1>
+            <p class="subtitle">解密测验 | G2 Unit 3 Lesson 4</p>
+        </header>
+
+        <div class="intro">
+            <h2>What You'll Learn About / 你将学习</h2>
+            <ul class="key-points">
+                <li>Breaking secret codes / 破解秘密密码</li>
+                <li>Working in teams / 团队合作</li>
+                <li>Using clues to solve puzzles / 使用线索解谜</li>
+                <li>Creating your own codes / 创建自己的密码</li>
+            </ul>
+        </div>
+
+        <div id="quizContainer">
+            <div class="question" style="border-left-color: #C62828;">
+                <h3>Question 1</h3>
+                <p class="chinese">问题 1</p>
+                <p>What is a "code breaker"?</p>
+                <p class="chinese">什么是"密码破译者"？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q1" value="A">
+                        <span>A) Someone who makes codes</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="B">
+                        <span>B) Someone who solves secret codes</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="C">
+                        <span>C) Someone who breaks computers</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="D">
+                        <span>D) Someone who writes books</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback1"></div>
+            </div>
+
+            <div class="question" style="border-left-color: #B71C1C;">
+                <h3>Question 2</h3>
+                <p class="chinese">问题 2</p>
+                <p>What is an important clue when breaking a code?</p>
+                <p class="chinese">破解密码时重要的线索是什么？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q2" value="A">
+                        <span>A) Looking for patterns</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="B">
+                        <span>B) Guessing randomly</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="C">
+                        <span>C) Counting the letters</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="D">
+                        <span>D) Writing it backwards</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback2"></div>
+            </div>
+
+            <div class="question" style="border-left-color: #D32F2F;">
+                <h3>Question 3</h3>
+                <p class="chinese">问题 3</p>
+                <p>Why is teamwork important for code breaking?</p>
+                <p class="chinese">为什么团队合作对破译密码很重要？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q3" value="A">
+                        <span>A) Because it's faster to work together</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="B">
+                        <span>B) Because different people see different patterns</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="C">
+                        <span>C) Because you need more computers</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="D">
+                        <span>D) Both A and B</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback3"></div>
+            </div>
+
+            <div class="question" style="border-left-color: #E53935;">
+                <h3>Question 4</h3>
+                <p class="chinese">问题 4</p>
+                <p>If you see the message "BCD" and know it's a +1 code, what was the original message?</p>
+                <p class="chinese">如果你看到消息"BCD"并且知道是+1密码，原始消息是什么？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q4" value="A">
+                        <span>A) ABC</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="B">
+                        <span>B) CDE</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="C">
+                        <span>C) BCD</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="D">
+                        <span>D) DEF</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback4"></div>
+            </div>
+
+            <div class="question" style="border-left-color: #C62828;">
+                <h3>Question 5</h3>
+                <p class="chinese">问题 5</p>
+                <p>What is the most important skill for a code detective?</p>
+                <p class="chinese">对于密码侦探来说，最重要的技能是什么？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q5" value="A">
+                        <span>A) Being the fastest</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="B">
+                        <span>B) Working well with a team</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="C">
+                        <span>C) Having a magnifying glass</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="D">
+                        <span>D) Writing in secret code</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback5"></div>
+            </div>
+
+            <div class="bonus">
+                <h3>🌟 Bonus Challenge!</h3>
+                <p class="chinese">🌟 挑战题！</p>
+                <p>Create a secret code and write a clue to help someone solve it.</p>
+                <p class="chinese">创建一个秘密密码并写一个线索来帮助某人解决它。</p>
+                <textarea id="bonusAnswer" placeholder="Write your code and clue here... / 在这里写下你的密码和线索..."></textarea>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn btn-primary" onclick="checkAnswers()">Check Answers</button>
+            <button class="btn btn-secondary" onclick="resetQuiz()" style="display: none;" id="retryBtn">Try Again</button>
+        </div>
+
+        <div id="results" style="display: none;"></div>
+
+        <footer>
+            <p>G2 STEAM - Unit 3 Lesson 4: Code Breaking Project | Spring 2026</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

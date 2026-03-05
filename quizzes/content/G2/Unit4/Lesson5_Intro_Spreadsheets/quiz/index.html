@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 5 Quiz - Intro to Spreadsheets</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="quiz-header">
+            <h1>Lesson 5 Quiz: Intro to Spreadsheets</h1>
+            <h2>第五课测验：电子表格入门</h2>
+            <p>Unit 4: Data and Spreadsheets | 第四单元：数据与电子表格</p>
+        </div>
+
+        <div class="quiz-container">
+            <!-- Question 1 -->
+            <div class="question" id="q1">
+                <p class="question-text">
+                    What do we call the horizontal lines in a spreadsheet?<br>
+                    电子表格中的横线叫什么？
+                </p>
+                <div class="options">
+                    <button class="option-btn" onclick="selectAnswer(1, 'A')">A. Columns / 列 (字母)</button>
+                    <button class="option-btn" onclick="selectAnswer(1, 'B')">B. Rows / 行 (数字)</button>
+                    <button class="option-btn" onclick="selectAnswer(1, 'C')">C. Cells / 单元格</button>
+                    <button class="option-btn" onclick="selectAnswer(1, 'D')">D. Tables / 表格</button>
+                </div>
+                <div class="feedback" id="feedback1"></div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="question" id="q2">
+                <p class="question-text">
+                    What represents a column in a spreadsheet?<br>
+                    电子表格中什么代表列？
+                </p>
+                <div class="options">
+                    <button class="option-btn" onclick="selectAnswer(2, 'A')">A. Numbers (1, 2, 3...) / 数字</button>
+                    <button class="option-btn" onclick="selectAnswer(2, 'B')">B. Letters (A, B, C...) / 字母</button>
+                    <button class="option-btn" onclick="selectAnswer(2, 'C')">C. Colors / 颜色</button>
+                    <button class="option-btn" onclick="selectAnswer(2, 'D')">D. Symbols / 符号</button>
+                </div>
+                <div class="feedback" id="feedback2"></div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="question" id="q3">
+                <p class="question-text">
+                    What is a cell in a spreadsheet?<br>
+                    电子表格中的单元格是什么？
+                </p>
+                <div class="options">
+                    <button class="option-btn" onclick="selectAnswer(3, 'A')">A. A phone / 手机</button>
+                    <button class="option-btn" onclick="selectAnswer(3, 'B')">B. A small box where data goes / 存放数据的小格子</button>
+                    <button class="option-btn" onclick="selectAnswer(3, 'C')">C. A chart / 图表</button>
+                    <button class="option-btn" onclick="selectAnswer(3, 'D')">D. A formula / 公式</button>
+                </div>
+                <div class="feedback" id="feedback3"></div>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="question" id="q4">
+                <p class="question-text">
+                    What cell address is at Column A, Row 3?<br>
+                    列A行3的单元格地址是什么？
+                </p>
+                <div class="options">
+                    <button class="option-btn" onclick="selectAnswer(4, 'A')">A. A3</button>
+                    <button class="option-btn" onclick="selectAnswer(4, 'B')">B. 3A</button>
+                    <button class="option-btn" onclick="selectAnswer(4, 'C')">C. C1</button>
+                    <button class="option-btn" onclick="selectAnswer(4, 'D')">D. B3</button>
+                </div>
+                <div class="feedback" id="feedback4"></div>
+            </div>
+
+            <!-- Question 5 -->
+            <div class="question" id="q5">
+                <p class="question-text">
+                    What do we call boxes going across (horizontally)?<br>
+                    横向排列的格子叫什么？
+                </p>
+                <div class="options">
+                    <button class="option-btn" onclick="selectAnswer(5, 'A')">A. Rows / 行</button>
+                    <button class="option-btn" onclick="selectAnswer(5, 'B')">B. Columns / 列</button>
+                    <button class="option-btn" onclick="selectAnswer(5, 'C')">C. Cells / 单元格</button>
+                </div>
+                <div class="feedback" id="feedback5"></div>
+            </div>
+        </div>
+
+        <div class="score-container">
+            <div class="score">
+                <span>Score / 得分: </span>
+                <span id="currentScore">0</span> / 5
+            </div>
+            <button class="reset-btn" onclick="resetQuiz()">Try Again / 再试一次</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

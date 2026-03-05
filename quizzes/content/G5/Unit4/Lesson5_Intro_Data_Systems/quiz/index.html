@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introduction to Data Systems Quiz - G5 STEAM</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="title">Introduction to Data Systems Quiz!</h1>
+            <p class="subtitle">数据管理系统入门 quiz</p>
+        </header>
+
+        <section class="intro">
+            <h2>Today we learned about Data Management Systems!</h2>
+            <ul class="key-points">
+                <li>What is DATA and why it's important</li>
+                <li>How weather services collect and store data</li>
+                <li>Basic parts of a database</li>
+                <li>How to design a database for weather information</li>
+            </ul>
+        </section>
+
+        <form id="quizForm">
+            <section class="question q1" style="background: #FFF9C4; border-left-color: #FBC02D;">
+                <h3>Question 1: What is DATA?</h3>
+                <p class="chinese">数据是什么？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q1" value="A">
+                        <span>A) Only numbers</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="B">
+                        <span>B) Information, facts, and figures</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="C">
+                        <span>C) Only pictures</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="D">
+                        <span>D) Only text documents</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback1"></div>
+            </section>
+
+            <section class="question q2" style="background: #F3E5F5; border-left-color: #AB47BC;">
+                <h3>Question 2: Which of these is an example of weather data?</h3>
+                <p class="chinese">以下哪项是天气数据的示例？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q2" value="A">
+                        <span>A) Your favorite color</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="B">
+                        <span>B) Temperature: 25C</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="C">
+                        <span>C) Your phone number</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="D">
+                        <span>D) The name of your pet</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback2"></div>
+            </section>
+
+            <section class="question q3" style="background: #FFE0B2; border-left-color: #FF9800;">
+                <h3>Question 3: What is a DATABASE?</h3>
+                <p class="chinese">什么是数据库？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q3" value="A">
+                        <span>A) A video game</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="B">
+                        <span>B) A type of computer</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="C">
+                        <span>C) An organized collection of data</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="D">
+                        <span>D) A folder for papers</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback3"></div>
+            </section>
+
+            <section class="question q4" style="background: #B2EBF2; border-left-color: #00BCD4;">
+                <h3>Question 4: In a database, what is a TABLE?</h3>
+                <p class="chinese">在数据库中，什么是表？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q4" value="A">
+                        <span>A) A piece of furniture</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="B">
+                        <span>B) A collection of related data</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="C">
+                        <span>C) One piece of information</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="D">
+                        <span>D) A type of chart</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback4"></div>
+            </section>
+
+            <section class="question q5" style="background: #C8E6C9; border-left-color: #4CAF50;">
+                <h3>Question 5: In a database, what is a RECORD?</h3>
+                <p class="chinese">在数据库中，什么是记录？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q5" value="A">
+                        <span>A) One complete entry</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="B">
+                        <span>B) A music song</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="C">
+                        <span>C) One piece of information</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="D">
+                        <span>D) The database title</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback5"></div>
+            </section>
+
+            <section class="question q6" style="background: #FFCDD2; border-left-color: #E53935;">
+                <h3>Question 6: In a database, what is a FIELD?</h3>
+                <p class="chinese">在数据库中，什么是字段？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q6" value="A">
+                        <span>A) A place to play sports</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q6" value="B">
+                        <span>B) A collection of all data</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q6" value="C">
+                        <span>C) One piece of information</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q6" value="D">
+                        <span>D) A type of chart</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback6"></div>
+            </section>
+
+            <section class="question q7" style="background: #E1BEE7; border-left-color: #9C27B0;">
+                <h3>Question 7: Which of these is an example of automatic weather data collection?</h3>
+                <p class="chinese">以下哪项是自动天气数据收集的示例？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q7" value="A">
+                        <span>A) Asking people what they feel</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q7" value="B">
+                        <span>B) Weather stations</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q7" value="C">
+                        <span>C) Drawing pictures</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q7" value="D">
+                        <span>D) Writing in a notebook</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback7"></div>
+            </section>
+
+            <section class="question q8" style="background: #BBDEFB; border-left-color: #1976D2;">
+                <h3>Question 8: Why do we need to organize data?</h3>
+                <p class="chinese">为什么我们需要组织数据？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q8" value="A">
+                        <span>A) To make it look pretty</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q8" value="B">
+                        <span>B) Only to waste time</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q8" value="C">
+                        <span>C) To make it easier to search and find patterns</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q8" value="D">
+                        <span>D) Because computers like colors</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback8"></div>
+            </section>
+
+            <section class="bonus">
+                <h3>⭐ BONUS: Design Your Own Question!</h3>
+                <p>Create a specific, clear question related to Data Management Systems:</p>
+                <p class="chinese">创建一个与数据管理系统相关的具体、清晰的问题：</p>
+                <textarea id="bonusAnswer" placeholder="Write your question here... / 在这里写下你的问题..."></textarea>
+            </section>
+
+            <div class="buttons">
+                <button type="button" class="btn btn-primary" onclick="checkAnswers()">
+                    Check Answers! / 检查答案！
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resetQuiz()" id="retryBtn" style="display: none;">
+                    Try Again! / 再试一次！
+                </button>
+            </div>
+        </form>
+
+        <div class="results" id="results" style="display: none;">
+            <h2>🎉 How did you do?</h2>
+            <div class="score-display">
+                <p id="scoreText"></p>
+                <div class="stars" id="starsDisplay"></div>
+            </div>
+            <div class="message" id="finalMessage"></div>
+        </div>
+
+        <footer>
+            G5 STEAM - Unit 4 Lesson 5: Introduction to Data Systems | Spring 2026
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

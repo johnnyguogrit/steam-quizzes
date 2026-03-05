@@ -1,0 +1,253 @@
+/* Lesson 6 Theme - Green Step Counter / 绿色计步器主题 */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', Arial, sans-serif;
+    background: linear-gradient(135deg, #065f46 0%, #10b981 50%, #34d399 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.header {
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+    animation: fadeInDown 0.6s ease;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.header h2 {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+    color: #fbbf24;
+}
+
+.subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.quiz-box {
+    background: white;
+    border-radius: 25px;
+    padding: 30px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: fadeInUp 0.6s ease;
+}
+
+.question {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border-radius: 15px;
+    border-left: 5px solid #10b981;
+}
+
+.question.bonus {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-left: 5px solid #f59e0b;
+}
+
+.question-text {
+    font-size: 1.1rem;
+    color: #1e293b;
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.chinese {
+    color: #475569;
+    font-size: 1rem;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.option {
+    display: block;
+    padding: 12px 15px;
+    background: white;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.option:hover {
+    border-color: #10b981;
+    transform: translateX(5px);
+}
+
+.option input[type="radio"] {
+    margin-right: 10px;
+    transform: scale(1.2);
+    accent-color: #10b981;
+}
+
+.option.correct {
+    background: #d1fae5;
+    border-color: #059669;
+}
+
+.option.incorrect {
+    background: #fee2e2;
+    border-color: #ef4444;
+}
+
+.bonus-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #d1d5db;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+.bonus-input:focus {
+    outline: none;
+    border-color: #10b981;
+}
+
+.bonus-hint {
+    font-size: 0.9rem;
+    color: #6b7280;
+    font-style: italic;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #065f46 0%, #10b981 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.3rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.submit-btn:hover {
+    transform: scale(1.02);
+}
+
+.result {
+    margin-top: 30px;
+    padding: 25px;
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border-radius: 15px;
+    text-align: center;
+}
+
+.result.hidden {
+    display: none;
+}
+
+.result h3 {
+    font-size: 1.8rem;
+    color: #065f46;
+    margin-bottom: 15px;
+}
+
+.score {
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.feedback {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.feedback-item {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
+.feedback-item.correct {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.feedback-item.incorrect {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.retry-btn {
+    padding: 12px 30px;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.retry-btn:hover {
+    background: #059669;
+}
+
+.footer {
+    text-align: center;
+    color: white;
+    margin-top: 30px;
+    font-size: 0.9rem;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .header h1 {
+        font-size: 1.8rem;
+    }
+    .quiz-box {
+        padding: 20px;
+    }
+    .question {
+        padding: 15px;
+    }
+}

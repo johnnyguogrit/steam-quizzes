@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 6 Quiz - IP Addresses and Protocols</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Lesson 6 Quiz: IP Addresses and Protocols</h1>
+            <h2>第六课测验：IP地址和协议</h2>
+        </header>
+
+        <form id="quizForm" class="quiz-form">
+            <!-- Question 1 -->
+            <div class="question">
+                <h3>Q1. What does IP stand for?</h3>
+                <p class="question-cn">Q1. IP代表什么？</p>
+                <div class="options">
+                    <label><input type="radio" name="q1" value="A"> A. Internet Phone</label>
+                    <label><input type="radio" name="q1" value="B"> B. Internet Protocol</label>
+                    <label><input type="radio" name="q1" value="C"> C. Internal Process</label>
+                    <label><input type="radio" name="q1" value="D"> D. International Provider</label>
+                </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="question">
+                <h3>Q2. What is an IP address like?</h3>
+                <p class="question-cn">Q2. IP地址像什么？</p>
+                <div class="options">
+                    <label><input type="radio" name="q2" value="A"> A. A phone number</label>
+                    <label><input type="radio" name="q2" value="B"> B. A home address for your device</label>
+                    <label><input type="radio" name="q2" value="C"> C. A password</label>
+                    <label><input type="radio" name="q2" value="D"> D. A username</label>
+                </div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="question">
+                <h3>Q3. What does a valid IP address look like?</h3>
+                <p class="question-cn">Q3. 有效的IP地址是什么样的？</p>
+                <div class="options">
+                    <label><input type="radio" name="q3" value="A"> A. 192.168.1.100</label>
+                    <label><input type="radio" name="q3" value="B"> B. 123-456-7890</label>
+                    <label><input type="radio" name="q3" value="C"> C. www.google.com</label>
+                    <label><input type="radio" name="q3" value="D"> D. 192:168:1:100</label>
+                </div>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="question">
+                <h3>Q4. How many groups of numbers are in an IP address?</h3>
+                <p class="question-cn">Q4. IP地址中有几组数字？</p>
+                <div class="options">
+                    <label><input type="radio" name="q4" value="A"> A. 2 groups</label>
+                    <label><input type="radio" name="q4" value="B"> B. 3 groups</label>
+                    <label><input type="radio" name="q4" value="C"> C. 4 groups</label>
+                    <label><input type="radio" name="q4" value="D"> D. 5 groups</label>
+                </div>
+            </div>
+
+            <!-- Question 5 -->
+            <div class="question">
+                <h3>Q5. What is a protocol?</h3>
+                <p class="question-cn">Q5. 什么是协议？</p>
+                <div class="options">
+                    <label><input type="radio" name="q5" value="A"> A. A type of computer</label>
+                    <label><input type="radio" name="q5" value="B"> B. Rules for communication</label>
+                    <label><input type="radio" name="q5" value="C"> C. A website</label>
+                    <label><input type="radio" name="q5" value="D"> D. A cable type</label>
+                </div>
+            </div>
+
+            <!-- Question 6 -->
+            <div class="question">
+                <h3>Q6. What does HTTPS stand for?</h3>
+                <p class="question-cn">Q6. HTTPS代表什么？</p>
+                <div class="options">
+                    <label><input type="radio" name="q6" value="A"> A. HyperText Transfer Protocol Secure</label>
+                    <label><input type="radio" name="q6" value="B"> B. High Transfer Power System</label>
+                    <label><input type="radio" name="q6" value="C"> C. Home Page Text Protocol</label>
+                    <label><input type="radio" name="q6" value="D"> D. Internet Phone Transfer System</label>
+                </div>
+            </div>
+
+            <!-- Question 7 -->
+            <div class="question">
+                <h3>Q7. Why can't two devices on the same network have the same IP address?</h3>
+                <p class="question-cn">Q7. 为什么同一网络上的两个设备不能有相同的IP地址？</p>
+                <div class="options">
+                    <label><input type="radio" name="q7" value="A"> A. It's against the law</label>
+                    <label><input type="radio" name="q7" value="B"> B. Data wouldn't know which device to go to</label>
+                    <label><input type="radio" name="q7" value="C"> C. The internet would crash</label>
+                    <label><input type="radio" name="q7" value="D"> D. It would make the network slower</label>
+                </div>
+            </div>
+
+            <!-- Bonus Question -->
+            <div class="bonus-question">
+                <h3>Bonus Question</h3>
+                <h4>Find the IP address of the device you're using and write it down:</h4>
+                <p class="question-cn">附加题：找到你正在使用的设备的IP地址并写下来：</p>
+                <textarea name="bonus" rows="5" placeholder="Write the IP address you found..."></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">Submit Quiz | 提交测验</button>
+        </form>
+
+        <div id="result" class="result hidden"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

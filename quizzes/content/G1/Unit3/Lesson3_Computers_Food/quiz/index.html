@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computers in Food Quiz - G1 STEAM</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="title">🤖 Computers in Food Quiz!</h1>
+            <p class="subtitle">How does technology help make our food?</p>
+        </header>
+
+        <section class="intro">
+            <h2>Today we learned about Technology in Food! Let's review:</h2>
+            <ul class="key-points">
+                <li>Farm robots help plant and harvest</li>
+                <li>Factories use machines to package food</li>
+                <li>Technology makes food production faster</li>
+            </ul>
+        </section>
+
+        <form id="quizForm">
+            <section class="question q1" style="background: #FFF9C4; border-left-color: #FBC02D;">
+                <h3>Question 1: What is DIFFERENT about modern farming?</h3>
+                <p class="chinese">现代农业有什么不同？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q1" value="wrong">
+                        <span>A) People do all the work</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="correct">
+                        <span>B) Machines and robots help</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="wrong">
+                        <span>C) It takes more time</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback1"></div>
+            </section>
+            <section class="question q2" style="background: #F3E5F5; border-left-color: #AB47BC;">
+                <h3>Question 2: What do DRONES do on farms?</h3>
+                <p class="chinese">无人机在农场做什么？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q2" value="wrong">
+                        <span>A) Only take photos</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="correct">
+                        <span>B) Water and spray plants</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="wrong">
+                        <span>C) Cook food</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback2"></div>
+            </section>
+            <section class="question q3" style="background: #FFE0B2; border-left-color: #FF9800;">
+                <h3>Question 3: What do SENSORS do in food factories?</h3>
+                <p class="chinese">传感器在食品工厂做什么？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q3" value="wrong">
+                        <span>A) Make the food taste better</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="correct">
+                        <span>B) Check quality and sort items</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="wrong">
+                        <span>C) Pack boxes only</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback3"></div>
+            </section>
+            <section class="question q4" style="background: #B2EBF2; border-left-color: #00BCD4;">
+                <h3>Question 4: Why do we use technology in food production?</h3>
+                <p class="chinese">为什么我们在食品生产中使用技术？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q4" value="wrong">
+                        <span>A) To make food expensive</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="correct">
+                        <span>B) To be faster and more efficient</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="wrong">
+                        <span>C) To have less food</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback4"></div>
+            </section>
+            <section class="bonus">
+                <h3>⭐ BONUS: Design a Food Technology!</h3>
+                <p>Draw or describe a robot that could help in a food factory:</p>
+                <textarea id="bonusAnswer" placeholder="My robot would...&#10;It helps by...&#10;It is good because..."></textarea>
+            </section>
+
+            <div class="buttons">
+                <button type="button" class="btn btn-primary" onclick="checkAnswers()">
+                    Check Answers! ✅
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resetQuiz()" id="retryBtn" style="display: none;">
+                    Try Again! 🔄
+                </button>
+            </div>
+        </form>
+
+        <div class="results" id="results" style="display: none;">
+            <h2>🎉 How did you do?</h2>
+            <div class="score-display">
+                <p id="scoreText"></p>
+                <div class="stars" id="starsDisplay"></div>
+            </div>
+            <div class="message" id="finalMessage"></div>
+        </div>
+
+        <footer>
+            G1 STEAM - Unit 3 Lesson 3: Computers in Food | Spring 2026
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

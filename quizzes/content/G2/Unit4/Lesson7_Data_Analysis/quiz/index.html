@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 7 Quiz - Data Analysis</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="quiz-header">
+            <h1>Lesson 7 Quiz: Data Analysis</h1>
+            <h2>第七课测验：数据分析</h2>
+            <p>Unit 4: Data and Spreadsheets | 第四单元：数据与电子表格</p>
+        </div>
+
+        <div class="quiz-container">
+            <!-- Question 1 -->
+            <div class="question" id="q1">
+                <p class="question-text">
+                    What does a bar chart show us?<br>
+                    柱状图给我们展示了什么？
+                </p>
+                <div class="options">
+                    <button class="option-btn" onclick="selectAnswer(1, 'A')">A. Only colors / 只有颜色</button>
+                    <button class="option-btn" onclick="selectAnswer(1, 'B')">B. Data using bars of different lengths / 用不同长度的柱子展示数据</button>
+                    <button class="option-btn" onclick="selectAnswer(1, 'C')">C. Only words / 只有文字</button>
+                    <button class="option-btn" onclick="selectAnswer(1, 'D')">D. A map / 地图</button>
+                </div>
+                <div class="feedback" id="feedback1"></div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="question" id="q2">
+                <p class="question-text">
+                    In a bar chart, what does "most" look like?<br>
+                    在柱状图中，"最多"看起来是什么样的？
+                </p>
+                <div class="options">
+                    <button class="option-btn" onclick="selectAnswer(2, 'A')">A. The shortest bar / 最短的柱子</button>
+                    <button class="option-btn" onclick="selectAnswer(2, 'B')">B. The thinnest bar / 最细的柱子</button>
+                    <button class="option-btn" onclick="selectAnswer(2, 'C')">C. The tallest bar / 最高的柱子</button>
+                    <button class="option-btn" onclick="selectAnswer(2, 'D')">D. The blue bar / 蓝色的柱子</button>
+                </div>
+                <div class="feedback" id="feedback2"></div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="question" id="q3">
+                <p class="question-text">
+                    If apples has 5 and bananas has 3, which has more?<br>
+                    如果苹果有5个，香蕉有3个，哪个更多？
+                </p>
+                <div class="options">
+                    <button class="option-btn" onclick="selectAnswer(3, 'A')">A. Apples / 苹果</button>
+                    <button class="option-btn" onclick="selectAnswer(3, 'B')">B. Bananas / 香蕉</button>
+                    <button class="option-btn" onclick="selectAnswer(3, 'C')">C. They are the same / 一样多</button>
+                    <button class="option-btn" onclick="selectAnswer(3, 'D')">D. Neither / 都没有</button>
+                </div>
+                <div class="feedback" id="feedback3"></div>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="question" id="q4">
+                <p class="question-text">
+                    What does "least" mean in data analysis?<br>
+                    在数据分析中，"最少"是什么意思？
+                </p>
+                <div class="options">
+                    <button class="option-btn" onclick="selectAnswer(4, 'A')">A. The biggest number / 最大的数字</button>
+                    <button class="option-btn" onclick="selectAnswer(4, 'B')">B. The longest bar / 最长的柱子</button>
+                    <button class="option-btn" onclick="selectAnswer(4, 'C')">C. The smallest number / 最小的数字</button>
+                    <button class="option-btn" onclick="selectAnswer(4, 'D')">D. The first number / 第一个数字</button>
+                </div>
+                <div class="feedback" id="feedback4"></div>
+            </div>
+
+            <!-- Question 5 -->
+            <div class="question" id="q5">
+                <p class="question-text">
+                    What does a BAR CHART show?<br>
+                    柱状图展示什么？
+                </p>
+                <div class="options">
+                    <button class="option-btn" onclick="selectAnswer(5, 'A')">A. Only words / 只有文字</button>
+                    <button class="option-btn" onclick="selectAnswer(5, 'B')">B. Numbers as pictures/bars / 数字以图片/柱子的形式</button>
+                    <button class="option-btn" onclick="selectAnswer(5, 'C')">C. Only colors / 只有颜色</button>
+                </div>
+                <div class="feedback" id="feedback5"></div>
+            </div>
+        </div>
+
+        <div class="score-container">
+            <div class="score">
+                <span>Score / 得分: </span>
+                <span id="currentScore">0</span> / 5
+            </div>
+            <button class="reset-btn" onclick="resetQuiz()">Try Again / 再试一次</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

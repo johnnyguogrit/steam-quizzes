@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Design Principles Quiz - G5 STEAM</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="title">Quiz Design Principles Quiz!</h1>
+            <p class="subtitle">/ Let's see what you learned!</p>
+        </header>
+
+        <section class="intro">
+            <h2>Today we learned about Quiz Design Principles! Let's review:</h2>
+            <ul class="key-points">
+                <li>A good quiz has clear questions and fun answers</li>
+                <li>Multiple choice questions work best for quiz apps</li>
+                <li>Questions should have exactly ONE correct answer</li>
+                <li>Good design makes quizzes engaging and fun</li>
+            </ul>
+        </section>
+
+        <form id="quizForm">
+            <section class="question q1" style="background: #FFF9C4; border-left-color: #FBC02D;">
+                <h3>Question 1: What makes a good quiz question?</h3>
+                <p class="chinese">什么让测验问题变好？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q1" value="A">
+                        <span>A) Very hard and confusing</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="B">
+                        <span>B) Clear and easy to understand</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="C">
+                        <span>C) Has no correct answer</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="D">
+                        <span>D) Very long with many words</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback1"></div>
+            </section>
+
+            <section class="question q2" style="background: #F3E5F5; border-left-color: #AB47BC;">
+                <h3>Question 2: Which is a type of quiz question?</h3>
+                <p class="chinese">哪一种是测验问题的类型？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q2" value="A">
+                        <span>A) Multiple Choice</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="B">
+                        <span>B) Random guessing</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="C">
+                        <span>C) No answer question</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="D">
+                        <span>D) Only questions for teachers</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback2"></div>
+            </section>
+
+            <section class="question q3" style="background: #FFE0B2; border-left-color: #FF9800;">
+                <h3>Question 3: How many correct answers should a quiz question have?</h3>
+                <p class="chinese">测验问题应该有多少个正确答案？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q3" value="A">
+                        <span>A) Zero correct answers</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="B">
+                        <span>B) Two or more correct answers</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="C">
+                        <span>C) Exactly ONE correct answer</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="D">
+                        <span>D) All answers should be correct</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback3"></div>
+            </section>
+
+            <section class="question q4" style="background: #B2EBF2; border-left-color: #00BCD4;">
+                <h3>Question 4: What is a "distractor" in a quiz question?</h3>
+                <p class="chinese">测验问题中的"干扰项"是什么？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q4" value="A">
+                        <span>A) The correct answer</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="B">
+                        <span>B) A wrong answer that seems possible</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="C">
+                        <span>C) A picture in the quiz</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="D">
+                        <span>D) The quiz title</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback4"></div>
+            </section>
+
+            <section class="question q5" style="background: #C8E6C9; border-left-color: #4CAF50;">
+                <h3>Question 5: How many answer choices should a multiple choice question have?</h3>
+                <p class="chinese">多项选择题应该有多少个答案选项？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q5" value="A">
+                        <span>A) Only 1 choice</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="B">
+                        <span>B) Usually 3-4 choices</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="C">
+                        <span>C) 10 or more choices</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="D">
+                        <span>D) 100 choices</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback5"></div>
+            </section>
+
+            <section class="question q6" style="background: #FFCDD2; border-left-color: #E53935;">
+                <h3>Question 6: What is the FIRST step when writing a quiz question?</h3>
+                <p class="chinese">编写测验问题时第一步是什么？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q6" value="A">
+                        <span>A) Choose a topic you know well</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q6" value="B">
+                        <span>B) Write the wrong answers</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q6" value="C">
+                        <span>C) Test the quiz</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q6" value="D">
+                        <span>D) Add colors</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback6"></div>
+            </section>
+
+            <section class="question q7" style="background: #E1BEE7; border-left-color: #9C27B0;">
+                <h3>Question 7: What should you do in Step 5 of writing a quiz question?</h3>
+                <p class="chinese">在编写测验问题的第5步你应该做什么？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q7" value="A">
+                        <span>A) Write more questions</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q7" value="B">
+                        <span>B) Check if it's fair and fun</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q7" value="C">
+                        <span>C) Delete the question</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q7" value="D">
+                        <span>D) Add pictures</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback7"></div>
+            </section>
+
+            <section class="question q8" style="background: #BBDEFB; border-left-color: #1976D2;">
+                <h3>Question 8: What should a good quiz question be?</h3>
+                <p class="chinese">好的测验问题应该是什么样的？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q8" value="A">
+                        <span>A) Fair for Grade 5 students</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q8" value="B">
+                        <span>B) Too easy for babies</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q8" value="C">
+                        <span>C) Too hard for teachers</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q8" value="D">
+                        <span>D) Boring and not fun</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback8"></div>
+            </section>
+
+            <section class="bonus">
+                <h3>⭐ BONUS: Design Your Own Question!</h3>
+                <p>Create a specific, clear quiz question about any topic you like:</p>
+                <textarea id="bonusAnswer" placeholder="Write your quiz question here with 4 answer choices (A, B, C, D)..."></textarea>
+            </section>
+
+            <div class="buttons">
+                <button type="button" class="btn btn-primary" onclick="checkAnswers()">
+                    Check Answers!
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resetQuiz()" id="retryBtn" style="display: none;">
+                    Try Again!
+                </button>
+            </div>
+        </form>
+
+        <div class="results" id="results" style="display: none;">
+            <h2>How did you do?</h2>
+            <div class="score-display">
+                <p id="scoreText"></p>
+                <div class="stars" id="starsDisplay"></div>
+            </div>
+            <div class="message" id="finalMessage"></div>
+        </div>
+
+        <footer>
+            G5 STEAM - Unit 3 Lesson 1: Quiz Design Principles | Spring 2026
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

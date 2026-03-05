@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Analysis and Visualization Quiz - G5 STEAM</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="title">Data Analysis and Visualization Quiz!</h1>
+            <p class="subtitle">数据分析和可视化 quiz</p>
+        </header>
+
+        <section class="intro">
+            <h2>Today we learned about Data Analysis and Visualization!</h2>
+            <ul class="key-points">
+                <li>What is data visualization</li>
+                <li>Different types of charts and graphs</li>
+                <li>How to choose the right chart for your data</li>
+                <li>How to read and interpret charts</li>
+            </ul>
+        </section>
+
+        <form id="quizForm">
+            <section class="question q1" style="background: #E8F5E9; border-left-color: #4CAF50;">
+                <h3>Question 1: What is data visualization?</h3>
+                <p class="chinese">什么是数据可视化？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q1" value="A">
+                        <span>A) Making pictures to help us understand data</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="B">
+                        <span>B) Writing numbers on paper</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="C">
+                        <span>C) Deleting data we don't need</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="D">
+                        <span>D) Counting numbers aloud</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback1"></div>
+            </section>
+
+            <section class="question q2" style="background: #E3F2FD; border-left-color: #2196F3;">
+                <h3>Question 2: Which chart is best for comparing categories?</h3>
+                <p class="chinese">哪个图表最适合比较类别？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q2" value="A">
+                        <span>A) Line chart</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="B">
+                        <span>B) Pie chart</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="C">
+                        <span>C) Bar chart</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="D">
+                        <span>D) Scatter plot</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback2"></div>
+            </section>
+
+            <section class="question q3" style="background: #FFF3E0; border-left-color: #FF9800;">
+                <h3>Question 3: Which chart shows changes over time?</h3>
+                <p class="chinese">哪个图表显示随时间的变化？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q3" value="A">
+                        <span>A) Bar chart</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="B">
+                        <span>B) Pie chart</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="C">
+                        <span>C) Line chart</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="D">
+                        <span>D) No chart shows time</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback3"></div>
+            </section>
+
+            <section class="question q4" style="background: #F3E5F5; border-left-color: #9C27B0;">
+                <h3>Question 4: What does a PIE CHART show?</h3>
+                <p class="chinese">饼图显示什么？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q4" value="A">
+                        <span>A) Changes over time</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="B">
+                        <span>B) Parts of a whole (percentages)</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="C">
+                        <span>C) Only two categories</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q4" value="D">
+                        <span>D) Temperature only</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback4"></div>
+            </section>
+
+            <section class="question q5" style="background: #FFEBEE; border-left-color: #E53935;">
+                <h3>Question 5: What is the first step to create a chart?</h3>
+                <p class="chinese">创建图表的第一步是什么？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q5" value="A">
+                        <span>A) Select your data</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="B">
+                        <span>B) Click "Insert" menu</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="C">
+                        <span>C) Choose colors</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q5" value="D">
+                        <span>D) Write a title</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback5"></div>
+            </section>
+
+            <section class="question q6" style="background: #E0F2F1; border-left-color: #009688;">
+                <h3>Question 6: Why do good charts need clear titles and labels?</h3>
+                <p class="chinese">为什么好的图表需要清晰的标题和标签？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q6" value="A">
+                        <span>A) To make them look pretty</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q6" value="B">
+                        <span>B) To use more colors</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q6" value="C">
+                        <span>C) So people can understand what the chart shows</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q6" value="D">
+                        <span>D) It's not important</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback6"></div>
+            </section>
+
+            <section class="question q7" style="background: #FFF8E1; border-left-color: #FFC107;">
+                <h3>Question 7: Which chart would you use to show rainfall by city?</h3>
+                <p class="chinese">你会用哪个图表来显示各城市的降雨量？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q7" value="A">
+                        <span>A) Line chart</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q7" value="B">
+                        <span>B) Bar chart</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q7" value="C">
+                        <span>C) Pie chart</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q7" value="D">
+                        <span>D) No chart can show this</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback7"></div>
+            </section>
+
+            <section class="question q8" style="background: #E1F5FE; border-left-color: #039BE5;">
+                <h3>Question 8: Which chart would you use to show temperature this week?</h3>
+                <p class="chinese">你会用哪个图表来显示本周的温度？</p>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q8" value="A">
+                        <span>A) Line chart</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q8" value="B">
+                        <span>B) Pie chart</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q8" value="C">
+                        <span>C) Only a table</span>
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q8" value="D">
+                        <span>D) Bar chart</span>
+                    </label>
+                </div>
+                <div class="feedback" id="feedback8"></div>
+            </section>
+
+            <section class="bonus">
+                <h3>⭐ BONUS: Design Your Own Question!</h3>
+                <p>Create a specific, clear question related to Data Visualization:</p>
+                <p class="chinese">创建一个与数据可视化相关的具体、清晰的问题：</p>
+                <textarea id="bonusAnswer" placeholder="Write your question here... / 在这里写下你的问题..."></textarea>
+            </section>
+
+            <div class="buttons">
+                <button type="button" class="btn btn-primary" onclick="checkAnswers()">
+                    Check Answers! / 检查答案！
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resetQuiz()" id="retryBtn" style="display: none;">
+                    Try Again! / 再试一次！
+                </button>
+            </div>
+        </form>
+
+        <div class="results" id="results" style="display: none;">
+            <h2>How did you do?</h2>
+            <div class="score-display">
+                <p id="scoreText"></p>
+                <div class="stars" id="starsDisplay"></div>
+            </div>
+            <div class="message" id="finalMessage"></div>
+        </div>
+
+        <footer>
+            G5 STEAM - Unit 4 Lesson 7: Data Analysis and Visualization | Spring 2026
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
