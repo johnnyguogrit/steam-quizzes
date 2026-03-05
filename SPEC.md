@@ -3,7 +3,7 @@
 ## Project Overview
 
 **Project Name**: STEAM Quiz Platform
-**Version**: 1.0.0
+**Version**: 1.2.0
 **Repository**: https://github.com/johnnyguogrit/steam-quizzes
 **Deployment**: https://steam-quizzes.streamlit.app
 **Status**: Production ✅
@@ -323,3 +323,17 @@ streamlit run streamlit_app/app.py
 
 **Last Updated**: 2026-03-05
 **Maintainer**: johnnyguogrit
+
+---
+
+## Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| v1.2.0 | 2026-03-05 | Simplify Teacher Dashboard UX, combined class creation with student import |
+| v1.1.0 | 2026-03-05 | Add single emoji graphical passwords and batch import |
+| v1.0.4 | 2026-03-05 | Improve delete class confirmation flow |
+| v1.0.3 | 2026-03-05 | Add delete class functionality |
+| v1.0.2 | 2026-03-05 | Fix quiz rendering with st.html() |
+| v1.0.1 | 2026-03-05 | Fix quiz path calculation |
+| v1.0.0 | 2026-03-05 | Initial release |
