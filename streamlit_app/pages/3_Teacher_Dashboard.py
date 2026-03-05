@@ -217,40 +217,40 @@ with tab2:
 
                 with col2:
                     if st.button("Generate Random Password", key=f"gen_{cls['id']}"):
-                    pw = generate_graphical_password(1)
-                    st.markdown(f"**Preview:** `{pw}`")
+                        pw = generate_graphical_password(1)
+                        st.markdown(f"**Preview:** `{pw}`")
 
-            st.markdown("**Option 2: Batch Import Students**")
+                st.markdown("**Option 2: Batch Import Students**")
 
-            names_input = st.text_area(
-                "Paste student names (one per line or comma-separated)",
-                placeholder="张三\n李四\n王五\n\nOr: 张三, 李四, 王五",
-                height=100,
-                key=f"batch_{cls['id']}"
-            )
+                names_input = st.text_area(
+                    "Paste student names (one per line or comma-separated)",
+                    placeholder="张三\n李四\n王五\n\nOr: 张三, 李四, 王五",
+                    height=100,
+                    key=f"batch_{cls['id']}"
+                )
 
-            if st.button("✨ Batch Import", key=f"batch_import_{cls['id']}", type="primary"):
-                if names_input.strip():
-                    # Parse names
-                    names = []
-                    for line in names_input.strip().split('\n'):
-                        line_names = [n.strip() for n in line.split(',') if n.strip()]
-                        names.extend(line_names)
+                if st.button("✨ Batch Import", key=f"batch_import_{cls['id']}", type="primary"):
+                    if names_input.strip():
+                        # Parse names
+                        names = []
+                        for line in names_input.strip().split('\n'):
+                            line_names = [n.strip() for n in line.split(',') if n.strip()]
+                            names.extend(line_names)
 
-                    if names:
-                        results = batch_create_students(names, str(cls["id"]))
-                        success_count = sum(1 for r in results if r["status"] == "success")
+                        if names:
+                            results = batch_create_students(names, str(cls["id"]))
+                            success_count = sum(1 for r in results if r["status"] == "success")
 
-                        st.markdown(f"### Results: {success_count}/{len(results)} students created")
+                            st.markdown(f"### Results: {success_count}/{len(results)} students created")
 
-                        for r in results:
-                            if r["status"] == "success":
-                                st.markdown(f"✅ **{r['full_name']}** - `{r['username']}` / `{r['password']}`")
-                            else:
-                                st.markdown(f"❌ **{r['full_name']}** - Failed")
+                            for r in results:
+                                if r["status"] == "success":
+                                    st.markdown(f"✅ **{r['full_name']}** - `{r['username']}` / `{r['password']}`")
+                                else:
+                                    st.markdown(f"❌ **{r['full_name']}** - Failed")
 
-                        if success_count > 0:
-                            st.rerun()
+                            if success_count > 0:
+                                st.rerun()
 
             # Show students list
             students = get_students_by_class(str(cls["id"]))
@@ -279,26 +279,26 @@ with tab2:
                 # Student table with actions
                 for student in students:
                     with st.expander(f"👤 {student.get('full_name', student['username'])}"):
-                    col1, col2, col3 = st.columns(3)
+                        col1, col2, col3 = st.columns(3)
 
-                    with col1:
-                        st.markdown(f"**Username:** `{student['username']}`")
-                        st.markdown(f"**Attempts:** {student.get('total_attempts', 0)}")
-                        if student.get("avg_score"):
-                            st.markdown(f"**Avg Score:** {student.get('avg_score', 0) * 100:.1f}%")
+                        with col1:
+                            st.markdown(f"**Username:** `{student['username']}`")
+                            st.markdown(f"**Attempts:** {student.get('total_attempts', 0)}")
+                            if student.get("avg_score"):
+                                st.markdown(f"**Avg Score:** {student.get('avg_score', 0) * 100:.1f}%")
 
-                    with col2:
-                        if st.button("📈 View Progress", key=f"progress_{student['id']}"):
-                            st.session_state.viewing_student_id = student['id']
-                            st.info("View progress feature coming soon!")
+                        with col2:
+                            if st.button("📈 View Progress", key=f"progress_{student['id']}"):
+                                st.session_state.viewing_student_id = student['id']
+                                st.info("View progress feature coming soon!")
 
-                    with col3:
-                        if st.button("🗑 Remove", key=f"remove_{student['id']}", type="secondary"):
-                            if delete_user(student["id"]):
-                                st.success("Student removed!")
-                                st.rerun()
-                            else:
-                                st.error("Failed to remove student.")
+                        with col3:
+                            if st.button("🗑 Remove", key=f"remove_{student['id']}", type="secondary"):
+                                if delete_user(student["id"]):
+                                    st.success("Student removed!")
+                                    st.rerun()
+                                else:
+                                    st.error("Failed to remove student.")
             else:
                 st.info("No students in this class yet. Add students above!")
 
