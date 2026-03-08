@@ -5,10 +5,10 @@ Displays the selected quiz and handles score submission.
 
 import streamlit as st
 import os
-import json
+import time
 from auth import require_auth, logout_button
 from config import get_quiz_by_id
-from database import record_quiz_attempt
+from database import record_quiz_attempt, get_quiz_attempts_by_quiz
 
 # Page config
 st.set_page_config(
@@ -49,6 +49,10 @@ if not quiz:
         st.switch_page("pages/1_Landing.py")
     st.stop()
 
+# Check if this is the first attempt
+existing_attempts = get_quiz_attempts_by_quiz(st.session_state.user_id, quiz_id)
+is_first_attempt = len(existing_attempts) == 0
+
 # Quiz header
 st.markdown(f"""
     <div style="padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; color: white; margin-bottom: 20px;">
@@ -56,6 +60,7 @@ st.markdown(f"""
         <p style="margin: 5px 0 0 0; opacity: 0.9;">{quiz['chinese']}</p>
         <p style="margin: 10px 0 0 0; font-size: 0.9rem;">{quiz['description']}</p>
         <p style="margin: 5px 0 0 0; font-size: 0.85rem;">📝 {quiz['questions']} Questions | Grade {quiz['grade'].upper()} - {quiz['unit'].replace('unit', 'Unit ').upper()}</p>
+        {"<p style='margin: 5px 0 0 0; font-size: 0.8rem; color: #FFD700;'>⭐ First Attempt - This score will be recorded!</p>" if is_first_attempt else "<p style='margin: 5px 0 0 0; font-size: 0.8rem; color: #aaa;'>Practice Mode - Score not recorded</p>"}
     </div>
 """, unsafe_allow_html=True)
 
@@ -100,7 +105,7 @@ if os.path.exists(js_path):
     with open(js_path, 'r', encoding='utf-8') as f:
         quiz_js = f.read()
 
-# Inject score reporting - store result in localStorage
+# Inject score reporting - auto-save to localStorage and notify parent
 injected_js = f"""
 <script>
 // Streamlit Quiz Integration
@@ -109,11 +114,12 @@ injected_js = f"""
     window.userId = {st.session_state.user_id};
     window.startTime = Date.now();
     window.quizCompleted = false;
+    window.autoSaveEnabled = {str(is_first_attempt).lower()};  // Only auto-save on first attempt
 
     // Clear any old results when loading new quiz
     localStorage.removeItem('steam_quiz_result');
 
-    // Function to send score to Streamlit
+    // Function to send score to server and update UI
     window.reportScore = function(score, total) {{
         if (window.quizCompleted) return;
         window.quizCompleted = true;
@@ -124,17 +130,21 @@ injected_js = f"""
         // Update the results display
         const resultsDiv = document.getElementById('streamlit-quiz-results');
         if (resultsDiv) {{
+            const saveMsg = window.autoSaveEnabled ?
+                '<p style="color: #4CAF50; font-weight: bold;">✅ Score automatically saved!</p>' :
+                '<p style="color: #999;">Practice mode - score not recorded</p>';
+
             resultsDiv.innerHTML = `
                 <div style="padding: 20px; background: #e8f5e9; border-radius: 10px; text-align: center; margin-top: 20px;">
                     <h2 style="color: #4caf50;">🎉 Quiz Completed!</h2>
                     <p style="font-size: 1.2rem;"><strong>Score: ${{score}}/${{total}} (${{percentage}}%)</strong></p>
                     <p>Time spent: ${{timeSpent}} seconds</p>
-                    <p style="color: #666;">Click the button below to save your result!</p>
+                    ${{saveMsg}}
                 </div>
             `;
         }}
 
-        // Store result in localStorage with timestamp
+        // Store result in localStorage with timestamp for auto-save polling
         const result = {{
             type: 'quiz_completed',
             quizId: "{quiz_id}",
@@ -142,17 +152,21 @@ injected_js = f"""
             score: score,
             total: total,
             timeSpent: timeSpent,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            autoSave: window.autoSaveEnabled
         }};
 
         try {{
             localStorage.setItem('steam_quiz_result', JSON.stringify(result));
             console.log('Result stored to localStorage:', result);
+
+            // Trigger a custom event for the auto-save poller
+            window.dispatchEvent(new CustomEvent('quizCompleted', {{ detail: result }}));
         }} catch (e) {{
             console.error('Error storing quiz result:', e);
         }}
 
-        console.log('Quiz completed:', {{ score, total, timeSpent }});
+        console.log('Quiz completed:', {{ score, total, timeSpent, autoSave: window.autoSaveEnabled }});
     }};
 
     // Override checkAnswers function - MUST be loaded AFTER quiz JS
@@ -254,124 +268,73 @@ except Exception as e:
     # Fallback to components.v1.html for older Streamlit versions
     st.components.v1.html(quiz_html, height=800, scrolling=True)
 
-# Save Result Button Section
+# Auto-save polling section - runs continuously to detect completed quizzes
 st.markdown("---")
 
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    st.info("### After finishing the quiz:")
-    st.markdown("1. Click **Check Answers** in the quiz above")
-    st.markdown("2. Your score will appear automatically")
-    st.markdown("3. Click the button below to save your result")
+# Auto-save indicator
+if is_first_attempt:
+    st.info("🔄 **Auto-save enabled**: Your first attempt score will be automatically saved when you complete the quiz.")
+else:
+    st.info("📝 **Practice mode**: You've already taken this quiz. This attempt won't be recorded.")
 
-    if st.button("✅ Save My Quiz Result", type="primary", key="save_quiz_result"):
-        # Try to use st.js() if available (Streamlit 1.33+)
-        try:
-            result = st.js("""
-                const resultStr = localStorage.getItem('steam_quiz_result');
-                if (resultStr) {
-                    const result = JSON.parse(resultStr);
-                    const age = Date.now() - (result.timestamp || 0);
-                    if (age < 300000) {
-                        localStorage.removeItem('steam_quiz_result');
-                        return result;
-                    }
+# Auto-save polling using st.js()
+if is_first_attempt:
+    # Placeholder for auto-save status
+    if 'auto_save_status' not in st.session_state:
+        st.session_state.auto_save_status = {}
+
+    # Check for quiz completion using st.js()
+    try:
+        result = st.js("""
+            const resultStr = localStorage.getItem('steam_quiz_result');
+            if (resultStr) {
+                const result = JSON.parse(resultStr);
+                const age = Date.now() - (result.timestamp || 0);
+                if (age < 60000) {  // Valid for 1 minute
+                    localStorage.removeItem('steam_quiz_result');
+                    return result;
                 }
-                return null;
-            """)
+            }
+            return null;
+        """)
 
-            if result:
-                # Initialize quiz tracking in session state if not exists
-                if 'quiz_last_processed' not in st.session_state:
-                    st.session_state.quiz_last_processed = {}
+        if result:
+            # Create unique attempt key to prevent duplicate processing
+            attempt_key = f"{quiz_id}_{result.get('timestamp', '')}"
 
-                # Create unique attempt key to prevent duplicate processing
-                attempt_key = f"{quiz_id}_{result.get('timestamp', '')}"
-
-                if not st.session_state.quiz_last_processed.get(attempt_key):
-                    # Record the quiz attempt
-                    record_quiz_attempt(
-                        st.session_state.user_id,
-                        result['quizId'],
-                        result['score'],
-                        result['total'],
-                        result.get('timeSpent', 0)
-                    )
-
-                    percentage = round(result['score'] / result['total'] * 100)
-
-                    st.success(f"""
-                        🎉 **Quiz Completed!**
-                        - Score: {result['score']}/{result['total']} ({percentage}%)
-                        - Time: {result.get('timeSpent', 0)} seconds
-
-                        Your result has been saved to the database!
-                    """)
-                    st.balloons()
-
-                    # Mark as processed
-                    st.session_state.quiz_last_processed[attempt_key] = True
-
-                    # Add a button to view progress
-                    if st.button("📈 View My Progress", key="goto_progress_after_save"):
-                        st.switch_page("pages/4_Student_Progress.py")
-            else:
-                st.warning("""
-                    No quiz result found! Please make sure you:
-                    1. ✅ Answered all questions
-                    2. ✅ Clicked "Check Answers" in the quiz
-                    3. ✅ See your score displayed in the quiz
-
-                    Then click "Save My Quiz Result" again.
-                """)
-
-        except AttributeError:
-            # st.js() not available - use manual result entry
-            st.warning("""
-            **Automatic saving not available in your Streamlit version.**
-
-            Please enter your score manually:
-            """)
-
-            col_a, col_b = st.columns(2)
-            with col_a:
-                manual_score = st.number_input("Your Score", min_value=0, max_value=quiz['questions'], value=0, step=1)
-            with col_b:
-                st.write(f"out of {quiz['questions']} questions")
-
-            if st.button("Save Manual Result", type="secondary"):
-                # Initialize quiz tracking in session state if not exists
-                if 'quiz_last_processed' not in st.session_state:
-                    st.session_state.quiz_last_processed = {}
-
-                attempt_key = f"{quiz_id}_manual_{int(datetime.now().timestamp())}"
-
+            if not st.session_state.auto_save_status.get(attempt_key):
                 # Record the quiz attempt
                 record_quiz_attempt(
                     st.session_state.user_id,
-                    quiz_id,
-                    manual_score,
-                    quiz['questions'],
-                    0  # No time data for manual entry
+                    result['quizId'],
+                    result['score'],
+                    result['total'],
+                    result.get('timeSpent', 0)
                 )
 
-                percentage = round(manual_score / quiz['questions'] * 100)
+                percentage = round(result['score'] / result['total'] * 100)
 
                 st.success(f"""
-                    🎉 **Quiz Result Saved!**
-                    - Score: {manual_score}/{quiz['questions']} ({percentage}%)
+                    🎉 **First Attempt Saved!**
+                    - Score: {result['score']}/{result['total']} ({percentage}%)
+                    - Time: {result.get('timeSpent', 0)} seconds
 
-                    Your result has been saved!
+                    Your result has been automatically saved!
                 """)
                 st.balloons()
-                st.session_state.quiz_last_processed[attempt_key] = True
+
+                # Mark as processed
+                st.session_state.auto_save_status[attempt_key] = True
+
+    except AttributeError:
+        # st.js() not available - show info for manual check
+        st.info("💡 Complete the quiz and your result will be visible in 'My Progress'.")
 
 # Instructions
 st.markdown("""
----
 ### Instructions
 1. Answer all questions by selecting the best option
 2. Click "Check Answers" when you're done
-3. Click "Save My Quiz Result" to save your score
-4. Check "My Progress" to see your updated statistics
+3. Your score is automatically saved (first attempt only)
+4. Check "My Progress" to see your statistics
 """)
