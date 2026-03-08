@@ -341,7 +341,7 @@ with col2:
 
         # Try st.js() first (Streamlit 1.33+)
         try:
-            result = st.js(check_js)
+            result = st.javascript(check_js)
 
             if result:
                 if isinstance(result, str):
@@ -394,7 +394,7 @@ with col2:
                     st.info("📝 This was a practice attempt. Your score was not recorded (only first attempts count).")
 
         except AttributeError:
-            # st.js() not available, show error message
+            # st.javascript() not available, show error message
             st.error("⚠️ Streamlit 1.33+ required for quiz saving. Please update Streamlit or contact your teacher.")
             st.info("For teachers: Run `pip install --upgrade streamlit` to enable quiz result saving.")
 
