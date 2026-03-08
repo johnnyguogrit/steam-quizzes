@@ -5,7 +5,7 @@ Displays the selected quiz and handles score submission.
 
 import streamlit as st
 import os
-import time
+import json
 from auth import require_auth, logout_button
 from config import get_quiz_by_id
 from database import record_quiz_attempt
@@ -101,7 +101,7 @@ if os.path.exists(js_path):
     with open(js_path, 'r', encoding='utf-8') as f:
         quiz_js = f.read()
 
-# Inject score reporting - store result in localStorage for Python to retrieve
+# Inject score reporting - store result in localStorage
 injected_js = f"""
 <script>
 // Streamlit Quiz Integration
@@ -145,8 +145,6 @@ injected_js = f"""
 
         try {{
             localStorage.setItem('steam_quiz_result', JSON.stringify(result));
-            // Also dispatch event for immediate response
-            window.dispatchEvent(new CustomEvent('quizCompleted', {{ detail: result }}));
         }} catch (e) {{
             console.error('Error storing quiz result:', e);
         }}
@@ -251,83 +249,93 @@ except Exception as e:
     # Fallback to components.v1.html for older Streamlit versions
     st.components.v1.html(quiz_html, height=800, scrolling=True)
 
-# Check for quiz completion using JavaScript
-# This runs in the browser and returns the quiz result to Python
-quiz_result = st.javascript(f"""
-    // Check if quiz result is in localStorage
-    const resultStr = localStorage.getItem('steam_quiz_result');
-    if (resultStr) {{
-        try {{
-            const result = JSON.parse(resultStr);
-            const age = Date.now() - (result.timestamp || 0);
+# Poll for quiz completion - check localStorage periodically
+# Use a button to manually trigger result check when quiz is done
+st.markdown("---")
 
-            // Only process if result is for this quiz and less than 5 minutes old
-            if (result.quizId === '{quiz_id}' && age < 300000) {{
-                // Clear the result after reading
-                localStorage.removeItem('steam_quiz_result');
-                return result;
-            }} else if (age >= 300000) {{
-                // Clear old results
-                localStorage.removeItem('steam_quiz_result');
+# Add a "Save My Result" button that students click after completing the quiz
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    if st.button("✅ I have finished the quiz - Save my result", type="primary", key="save_quiz_result"):
+        # JavaScript to check localStorage and return the result
+        check_js = f"""
+        <script>
+        (function() {{
+            const resultStr = localStorage.getItem('steam_quiz_result');
+            if (resultStr) {{
+                try {{
+                    const result = JSON.parse(resultStr);
+                    const age = Date.now() - (result.timestamp || 0);
+
+                    // Only process if result is for this quiz and less than 5 minutes old
+                    if (result.quizId === '{quiz_id}' && age < 300000) {{
+                        // Return the result via Streamlit component API
+                        if (typeof Streamlit !== 'undefined' && Streamlit.setComponentValue) {{
+                            Streamlit.setComponentValue(result);
+                            localStorage.removeItem('steam_quiz_result');
+                        }}
+                    }}
+                }} catch (e) {{
+                    console.error('Error:', e);
+                }}
+            }} else {{
+                if (typeof Streamlit !== 'undefined' && Streamlit.setComponentValue) {{
+                    Streamlit.setComponentValue({{error: 'No quiz result found. Please complete the quiz first.'}});
+                }}
             }}
-        }} catch (e) {{
-            console.error('Error parsing quiz result:', e);
-            localStorage.removeItem('steam_quiz_result');
-        }}
-    }}
-    return null;
-""")
+        }})();
+        </script>
+        """
 
-# Process quiz completion data
-if quiz_result:
-    try:
-        data = quiz_result
+        result_component = st.components.v1.html(check_js, height=0)
 
-        if data.get('type') == 'quiz_completed' and data.get('quizId') == quiz_id:
-            # Initialize quiz tracking in session state if not exists
-            if 'quiz_last_processed' not in st.session_state:
-                st.session_state.quiz_last_processed = {}
+        # Process the result
+        if result_component:
+            if isinstance(result_component, dict) and result_component.get('error'):
+                st.warning(result_component['error'])
+            elif isinstance(result_component, dict) and result_component.get('type') == 'quiz_completed':
+                data = result_component
 
-            # Create unique attempt key to prevent duplicate processing
-            attempt_key = f"{quiz_id}_{data.get('timestamp', '')}"
+                # Initialize quiz tracking in session state if not exists
+                if 'quiz_last_processed' not in st.session_state:
+                    st.session_state.quiz_last_processed = {}
 
-            if not st.session_state.quiz_last_processed.get(attempt_key):
-                # Record the quiz attempt
-                record_quiz_attempt(
-                    st.session_state.user_id,
-                    data['quizId'],
-                    data['score'],
-                    data['total'],
-                    data.get('timeSpent', 0)
-                )
+                # Create unique attempt key to prevent duplicate processing
+                attempt_key = f"{quiz_id}_{data.get('timestamp', '')}"
 
-                percentage = round(data['score'] / data['total'] * 100)
+                if not st.session_state.quiz_last_processed.get(attempt_key):
+                    # Record the quiz attempt
+                    record_quiz_attempt(
+                        st.session_state.user_id,
+                        data['quizId'],
+                        data['score'],
+                        data['total'],
+                        data.get('timeSpent', 0)
+                    )
 
-                st.success(f"""
-                    🎉 **Quiz Completed!**
-                    - Score: {data['score']}/{data['total']} ({percentage}%)
-                    - Time: {data.get('timeSpent', 0)} seconds
+                    percentage = round(data['score'] / data['total'] * 100)
 
-                    Your result has been saved!
-                """)
-                st.balloons()
+                    st.success(f"""
+                        🎉 **Quiz Completed!**
+                        - Score: {data['score']}/{data['total']} ({percentage}%)
+                        - Time: {data.get('timeSpent', 0)} seconds
 
-                # Mark as processed
-                st.session_state.quiz_last_processed[attempt_key] = True
+                        Your result has been saved!
+                    """)
+                    st.balloons()
 
-                # Rerun to show success message
-                st.rerun()
-    except Exception as e:
-        st.error(f"Error processing quiz result: {e}")
-        import traceback
-        st.error(traceback.format_exc())
+                    # Mark as processed
+                    st.session_state.quiz_last_processed[attempt_key] = True
+
+                    # Rerun to show success message
+                    time.sleep(1)
+                    st.rerun()
 
 # Instructions
 st.markdown("""
----
 ### Instructions
 1. Answer all questions by selecting the best option
 2. Click "Check Answers" when you're done
-3. Your score will be automatically saved
+3. Click the "Save My Result" button below to save your score
 4. You can retake the quiz to improve your score!
 """)
