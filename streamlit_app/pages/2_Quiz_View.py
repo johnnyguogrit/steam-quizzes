@@ -101,7 +101,6 @@ if os.path.exists(js_path):
         quiz_js = f.read()
 
 # Inject score reporting - store result in localStorage
-# NOTE: Use {{ for literal { in Python f-strings, and ${{ for literal ${ in JS template literals
 injected_js = f"""
 <script>
 // Streamlit Quiz Integration
@@ -130,7 +129,7 @@ injected_js = f"""
                     <h2 style="color: #4caf50;">🎉 Quiz Completed!</h2>
                     <p style="font-size: 1.2rem;"><strong>Score: ${{score}}/${{total}} (${{percentage}}%)</strong></p>
                     <p>Time spent: ${{timeSpent}} seconds</p>
-                    <p style="color: #666;">Your result has been saved! Click the button below to confirm.</p>
+                    <p style="color: #666;">Click the button below to save your result!</p>
                 </div>
             `;
         }}
@@ -255,123 +254,124 @@ except Exception as e:
     # Fallback to components.v1.html for older Streamlit versions
     st.components.v1.html(quiz_html, height=800, scrolling=True)
 
-# Save Result Button
+# Save Result Button Section
 st.markdown("---")
 
-# Add a text input for students to paste their result (manual approach as fallback)
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
-    st.info("""
-    **After finishing the quiz:**
-    1. Click "Check Answers" to see your score
-    2. Open browser console (F12) and check if result was logged
-    3. Click the button below to save your result
-    """)
+    st.info("### After finishing the quiz:")
+    st.markdown("1. Click **Check Answers** in the quiz above")
+    st.markdown("2. Your score will appear automatically")
+    st.markdown("3. Click the button below to save your result")
 
     if st.button("✅ Save My Quiz Result", type="primary", key="save_quiz_result"):
-        # Use JavaScript to read localStorage and display the result
-        # We'll use st.components.v1.html to execute JS and return the value
-        check_js = f"""
-        <html>
-        <body>
-        <script>
-        (function() {{
-            const resultStr = localStorage.getItem('steam_quiz_result');
-            if (resultStr) {{
-                try {{
+        # Try to use st.js() if available (Streamlit 1.33+)
+        try:
+            result = st.js("""
+                const resultStr = localStorage.getItem('steam_quiz_result');
+                if (resultStr) {
                     const result = JSON.parse(resultStr);
                     const age = Date.now() - (result.timestamp || 0);
+                    if (age < 300000) {
+                        localStorage.removeItem('steam_quiz_result');
+                        return result;
+                    }
+                }
+                return null;
+            """)
 
-                    // Only process if result is for this quiz and less than 5 minutes old
-                    if (result.quizId === '{quiz_id}' && age < 300000) {{
-                        // Set document.body to the result so Streamlit can read it
-                        document.body.innerHTML = resultStr;
-                        // Also try to set window.name for older Streamlit versions
-                        window.name = resultStr;
-                    }} else {{
-                        document.body.innerHTML = JSON.stringify({{error: 'No valid quiz result found. Please complete the quiz first.'}});
-                    }}
-                }} catch (e) {{
-                    document.body.innerHTML = JSON.stringify({{error: 'Error reading result: ' + e.message}});
-                }}
-            }} else {{
-                document.body.innerHTML = JSON.stringify({{error: 'No quiz result found in localStorage. Please complete the quiz first.'}});
-            }}
-        }})();
-        </script>
-        </body>
-        </html>
-        """
+            if result:
+                # Initialize quiz tracking in session state if not exists
+                if 'quiz_last_processed' not in st.session_state:
+                    st.session_state.quiz_last_processed = {}
 
-        # The component returns the body.innerHTML as a string
-        result_component = st.components.v1.html(check_js, height=0, scrolling=False)
+                # Create unique attempt key to prevent duplicate processing
+                attempt_key = f"{quiz_id}_{result.get('timestamp', '')}"
 
-        # Process the result
-        if result_component:
-            try:
-                # result_component might be a string (body.innerHTML) or a dict
-                if isinstance(result_component, str):
-                    data = json.loads(result_component)
-                elif isinstance(result_component, dict):
-                    data = result_component
-                else:
-                    data = None
+                if not st.session_state.quiz_last_processed.get(attempt_key):
+                    # Record the quiz attempt
+                    record_quiz_attempt(
+                        st.session_state.user_id,
+                        result['quizId'],
+                        result['score'],
+                        result['total'],
+                        result.get('timeSpent', 0)
+                    )
 
-                if data and data.get('error'):
-                    st.warning(data['error'])
-                    st.info("💡 Make sure you:")
-                    st.info("1. Answered all questions")
-                    st.info("2. Clicked 'Check Answers' in the quiz")
-                    st.info("3. See the result displayed in the quiz")
+                    percentage = round(result['score'] / result['total'] * 100)
 
-                elif data and data.get('type') == 'quiz_completed':
-                    # Initialize quiz tracking in session state if not exists
-                    if 'quiz_last_processed' not in st.session_state:
-                        st.session_state.quiz_last_processed = {}
+                    st.success(f"""
+                        🎉 **Quiz Completed!**
+                        - Score: {result['score']}/{result['total']} ({percentage}%)
+                        - Time: {result.get('timeSpent', 0)} seconds
 
-                    # Create unique attempt key to prevent duplicate processing
-                    attempt_key = f"{quiz_id}_{data.get('timestamp', '')}"
+                        Your result has been saved to the database!
+                    """)
+                    st.balloons()
 
-                    if not st.session_state.quiz_last_processed.get(attempt_key):
-                        # Record the quiz attempt
-                        record_quiz_attempt(
-                            st.session_state.user_id,
-                            data['quizId'],
-                            data['score'],
-                            data['total'],
-                            data.get('timeSpent', 0)
-                        )
+                    # Mark as processed
+                    st.session_state.quiz_last_processed[attempt_key] = True
 
-                        percentage = round(data['score'] / data['total'] * 100)
+                    # Add a button to view progress
+                    if st.button("📈 View My Progress", key="goto_progress_after_save"):
+                        st.switch_page("pages/4_Student_Progress.py")
+            else:
+                st.warning("""
+                    No quiz result found! Please make sure you:
+                    1. ✅ Answered all questions
+                    2. ✅ Clicked "Check Answers" in the quiz
+                    3. ✅ See your score displayed in the quiz
 
-                        st.success(f"""
-                            🎉 **Quiz Completed!**
-                            - Score: {data['score']}/{data['total']} ({percentage}%)
-                            - Time: {data.get('timeSpent', 0)} seconds
+                    Then click "Save My Quiz Result" again.
+                """)
 
-                            Your result has been saved to the database!
-                        """)
-                        st.balloons()
+        except AttributeError:
+            # st.js() not available - use manual result entry
+            st.warning("""
+            **Automatic saving not available in your Streamlit version.**
 
-                        # Mark as processed
-                        st.session_state.quiz_last_processed[attempt_key] = True
+            Please enter your score manually:
+            """)
 
-                        # Clear localStorage
-                        st.components.v1.html("<script>localStorage.removeItem('steam_quiz_result');</script>", height=0)
+            col_a, col_b = st.columns(2)
+            with col_a:
+                manual_score = st.number_input("Your Score", min_value=0, max_value=quiz['questions'], value=0, step=1)
+            with col_b:
+                st.write(f"out of {quiz['questions']} questions")
 
-                        # Don't rerun immediately - let user see the success message
-            except json.JSONDecodeError:
-                st.error("Could not parse quiz result. Please try again.")
-            except Exception as e:
-                st.error(f"Error saving result: {e}")
-        else:
-            st.warning("No result received. Make sure you completed the quiz first.")
+            if st.button("Save Manual Result", type="secondary"):
+                # Initialize quiz tracking in session state if not exists
+                if 'quiz_last_processed' not in st.session_state:
+                    st.session_state.quiz_last_processed = {}
+
+                attempt_key = f"{quiz_id}_manual_{int(datetime.now().timestamp())}"
+
+                # Record the quiz attempt
+                record_quiz_attempt(
+                    st.session_state.user_id,
+                    quiz_id,
+                    manual_score,
+                    quiz['questions'],
+                    0  # No time data for manual entry
+                )
+
+                percentage = round(manual_score / quiz['questions'] * 100)
+
+                st.success(f"""
+                    🎉 **Quiz Result Saved!**
+                    - Score: {manual_score}/{quiz['questions']} ({percentage}%)
+
+                    Your result has been saved!
+                """)
+                st.balloons()
+                st.session_state.quiz_last_processed[attempt_key] = True
 
 # Instructions
 st.markdown("""
+---
 ### Instructions
 1. Answer all questions by selecting the best option
 2. Click "Check Answers" when you're done
-3. Click the "Save My Quiz Result" button to save your score
+3. Click "Save My Quiz Result" to save your score
 4. Check "My Progress" to see your updated statistics
 """)
