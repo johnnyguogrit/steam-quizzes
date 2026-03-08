@@ -5,7 +5,6 @@ Displays the selected quiz and handles score submission.
 
 import streamlit as st
 import os
-import json
 from auth import require_auth, logout_button
 from config import get_quiz_by_id
 from database import record_quiz_attempt
@@ -240,7 +239,7 @@ else:
 
 # Also append the original quiz JS
 if quiz_js:
-    quiz_html = quiz_html.replace('</body>', f'<script>{{quiz_js}}</script></body>')
+    quiz_html = quiz_html.replace('</body>', f'<script>{quiz_js}</script></body>')
 
 # Display the quiz using st.html (Streamlit 1.31+)
 try:
@@ -328,7 +327,6 @@ with col2:
                     st.session_state.quiz_last_processed[attempt_key] = True
 
                     # Rerun to show success message
-                    time.sleep(1)
                     st.rerun()
 
 # Instructions
