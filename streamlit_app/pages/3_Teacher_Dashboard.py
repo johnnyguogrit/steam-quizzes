@@ -50,11 +50,12 @@ with st.sidebar:
         st.markdown(f"**{num}** {animal['emoji']} {animal['name']} {animal['chinese']}")
 
 
-def create_credentials_pdf(class_name, students, password_map=None):
+def create_credentials_pdf(class_name, class_code, students, password_map=None):
     """Create a PDF with class credentials, supporting Chinese and animal SVG icons.
 
     Args:
         class_name: Name of the class
+        class_code: Unique 8-letter class code for student login
         students: List of student dictionaries
         password_map: Optional dict mapping user_id to password (animal number 1-12)
     """
@@ -111,6 +112,17 @@ def create_credentials_pdf(class_name, students, password_map=None):
         spaceAfter=8*mm
     )
 
+    # Class code style
+    class_code_style = ParagraphStyle(
+        'ClassCode',
+        parentStyle=styles['Heading2'],
+        fontName='ChineseFont' if chinese_font_registered else 'Helvetica-Bold',
+        fontSize=28,
+        alignment=1,
+        spaceAfter=5*mm,
+        textColor=colors.HexColor('#FF6B9D')
+    )
+
     # Subtitle style
     subtitle_style = ParagraphStyle(
         'CustomSubtitle',
@@ -123,6 +135,7 @@ def create_credentials_pdf(class_name, students, password_map=None):
 
     # Add title
     elements.append(Paragraph(f"{class_name}", title_style))
+    elements.append(Paragraph(f"Class Code: {class_code}", class_code_style))
     elements.append(Paragraph("班级学生登录凭证 / Student Login Credentials", subtitle_style))
 
     # Prepare table data with embedded SVG images
@@ -330,7 +343,7 @@ with tab2:
             cls = class_options[selected_class_name]
             student_count = cls.get("student_count", 0)
 
-            st.markdown(f"### 📚 {cls['name']} - {student_count} student{'s' if student_count != 1 else ''}")
+            st.markdown(f"### 📚 {cls['name']} - {cls.get('class_code', 'N/A')} - {student_count} student{'s' if student_count != 1 else ''}")
             st.markdown(f"**Grade Level:** {cls.get('grade_level', 'N/A')}")
 
             st.markdown("---")
@@ -462,7 +475,7 @@ with tab2:
                 with col1:
                     # PDF download with Chinese and emoji support
                     # Use session state passwords
-                    pdf_data = create_credentials_pdf(cls['name'], students, st.session_state.student_passwords)
+                    pdf_data = create_credentials_pdf(cls['name'], cls['class_code'], students, st.session_state.student_passwords)
                     st.download_button(
                         label="📄 Download Class Credentials (PDF)",
                         data=pdf_data,
@@ -582,7 +595,17 @@ with tab3:
             # Create the class first
             class_id = create_class(class_name, grade_level, teacher["id"])
 
+            # Get the class with its code
+            from database import get_connection
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT class_code FROM classes WHERE id = ?", (class_id,))
+            result = cursor.fetchone()
+            conn.close()
+            class_code = result["class_code"] if result else "N/A"
+
             st.success(f"✅ Class '{class_name}' created successfully!")
+            st.info(f"🔑 Class Code for students: **{class_code}**")
 
             # Then add students if provided
             if names_input.strip():

@@ -48,6 +48,7 @@ def init_db():
             name TEXT NOT NULL,
             grade_level TEXT,
             teacher_id INTEGER,
+            class_code TEXT UNIQUE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (teacher_id) REFERENCES users(id)
         )
@@ -116,6 +117,15 @@ ANIMAL_PASSWORDS = {
     12: {"name": "Zebra", "chinese": "斑马", "emoji": "🦓"},
 }
 
+# Memorable 8-letter words for class codes
+CLASS_CODE_WORDS = [
+    "PLANET", "GALAXY", "JUNGLE", "OCEAN", "FOREST",
+    "CASTLE", "DRAGON", "WIZARD", "KINGDOM", "VALLEY",
+    "SUNSHINE", "RAINBOW", "THUNDER", "DIAMOND", "CRYSTAL",
+    "VOLCANO", "GLACIER", "CANYON", "MOUNTAIN", "RIVER",
+    "PENGUIN", "DOLPHIN", "BUTTERFLY", "ELEPHANT", "GIRAFFE"
+]
+
 
 def get_animal_info(animal_number: int) -> dict:
     """Get animal information by number."""
@@ -128,6 +138,57 @@ def get_animal_by_name(animal_name: str) -> int:
         if info["name"].lower() == animal_name.lower():
             return num
     return 1
+
+
+# Class code functions for student login
+
+def generate_unique_class_code() -> str:
+    """Generate a unique 8-letter class code."""
+    import random
+    while True:
+        code = random.choice(CLASS_CODE_WORDS)
+        if not get_class_by_code(code):
+            return code
+
+
+def get_class_by_code(class_code: str) -> Optional[Dict]:
+    """Get class by class code."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM classes WHERE class_code = ?", (class_code,))
+    result = cursor.fetchone()
+    conn.close()
+    return dict(result) if result else None
+
+
+def get_students_by_class_code(class_code: str) -> List[Dict]:
+    """Get all students for a class using class code."""
+    cls = get_class_by_code(class_code)
+    if not cls:
+        return []
+    return get_students_by_class(str(cls["id"]))
+
+
+def authenticate_student(class_code: str, username: str, animal_number: int) -> Optional[Dict]:
+    """Authenticate student using class code, username, and animal password."""
+    cls = get_class_by_code(class_code)
+    if not cls:
+        return None
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """SELECT id, username, password_hash, role, full_name, class_id
+           FROM users WHERE username = ? AND class_id = ? AND role = 'student'
+        """,
+        (username, str(cls["id"]))
+    )
+    user = cursor.fetchone()
+    conn.close()
+
+    if user and user["password_hash"] == hash_password(str(animal_number)):
+        return dict(user)
+    return None
 
 
 def generate_graphical_password(length: int = 1) -> str:
@@ -232,12 +293,16 @@ def get_user_by_username(username: str) -> Optional[Dict]:
 
 
 def create_class(name: str, grade_level: str, teacher_id: int) -> int:
-    """Create a new class."""
+    """Create a new class with auto-generated class code."""
     conn = get_connection()
     cursor = conn.cursor()
+
+    # Generate unique class code
+    class_code = generate_unique_class_code()
+
     cursor.execute(
-        "INSERT INTO classes (name, grade_level, teacher_id) VALUES (?, ?, ?)",
-        (name, grade_level, teacher_id)
+        "INSERT INTO classes (name, grade_level, teacher_id, class_code) VALUES (?, ?, ?, ?)",
+        (name, grade_level, teacher_id, class_code)
     )
     conn.commit()
     class_id = cursor.lastrowid
