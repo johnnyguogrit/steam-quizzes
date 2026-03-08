@@ -611,9 +611,9 @@ with tab3:
             else:
                 st.info("👌 Class created without students. You can add students later in the 'Classes' tab.")
 
-            st.markdown("---")
-            if st.button("🔄 Create Another", use_container_width=True, key="tab3_create_another"):
-                st.rerun()
+    st.markdown("---")
+    if st.button("🔄 Create Another Class", use_container_width=True, key="tab3_create_another"):
+        st.rerun()
 
 with tab4:
     st.header("📤 Export Data")
