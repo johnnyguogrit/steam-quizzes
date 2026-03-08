@@ -381,6 +381,7 @@ Students use a child-friendly 3-step login process with class codes:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v1.8.1 | 2026-03-08 | Multi-method detection - localStorage, postMessage, iframe access with fallback |
 | v1.8.0 | 2026-03-08 | Auto-save with st.javascript() - Store result in window.steamQuizResult, click button to trigger st.javascript() for iframe-to-Python communication |
 | v1.7.0 | 2026-03-08 | Direct iframe access - Read quiz result from hidden div in quiz iframe via st.js(), bypassing postMessage issues
 | v1.6.9 | 2026-03-08 | Fix message listener timing - Set up postMessage listener BEFORE quiz loads to ensure messages are received
