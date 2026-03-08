@@ -3,7 +3,7 @@
 ## Project Overview
 
 **Project Name**: STEAM Quiz Platform
-**Version**: 1.4.1
+**Version**: 1.5.0
 **Repository**: https://github.com/johnnyguogrit/steam-quizzes
 **Deployment**: https://steam-quizzes.streamlit.app
 **Status**: Production ✅
@@ -18,8 +18,10 @@
 4. [API Reference](#api-reference)
 5. [User Roles & Permissions](#user-roles--permissions)
 6. [Quiz Structure](#quiz-structure)
-7. [Deployment](#deployment)
-8. [Future Enhancements](#future-enhancements)
+7. [Student Login Flow](#student-login-flow)
+8. [Deployment](#deployment)
+9. [Badge System](#badge-system)
+10. [Future Enhancements](#future-enhancements)
 
 ---
 
@@ -95,6 +97,8 @@ CREATE TABLE users (
 ### Classes Table
 ```sql
 CREATE TABLE classes (
+    class_code TEXT UNIQUE,
+    
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     grade_level TEXT,
@@ -277,6 +281,53 @@ streamlit run streamlit_app/app.py
 
 ---
 
+## Student Login Flow
+
+Students use a child-friendly 3-step login process with class codes:
+
+### Step 1: Enter Class Code
+- Students enter an 8-letter class code (e.g., RAINBOW, PLANET, JUNGLE)
+- Codes are generated automatically when teachers create classes
+- Error message shown if code is not found
+
+### Step 2: Select Name
+- Dropdown shows all students in the class
+- Names are displayed as full_name if available, otherwise username
+- Filtered by the class code from Step 1
+
+### Step 3: Choose Picture Password
+- 12 animal pictures displayed in a 4x3 grid
+- Each student is assigned one animal (1-12)
+- Visual feedback when an animal is selected
+- Error message if wrong animal is chosen
+
+### Class Code Words
+| Code | Code | Code | Code | Code |
+|------|------|------|------|------|
+| PLANET | GALAXY | JUNGLE | OCEAN | FOREST |
+| CASTLE | DRAGON | WIZARD | KINGDOM | VALLEY |
+| SUNSHINE | RAINBOW | THUNDER | DIAMOND | CRYSTAL |
+| VOLCANO | GLACIER | CANYON | MOUNTAIN | RIVER |
+| PENGUIN | DOLPHIN | BUTTERFLY | ELEPHANT | GIRAFFE |
+
+### Animal Passwords
+| Number | Animal | Chinese | Emoji |
+|--------|--------|---------|-------|
+| 1 | Dog | 狗 | 🐶 |
+| 2 | Cat | 猫 | 🐱 |
+| 3 | Mouse | 老鼠 | 🐭 |
+| 4 | Rabbit | 兔子 | 🐰 |
+| 5 | Fox | 狐狸 | 🦊 |
+| 6 | Bear | 熊 | 🐻 |
+| 7 | Panda | 熊猫 | 🐼 |
+| 8 | Koala | 考拉 | 🐨 |
+| 9 | Lion | 狮子 | 🦁 |
+| 10 | Monkey | 猴子 | 🐵 |
+| 11 | Frog | 青蛙 | 🐸 |
+| 12 | Zebra | 斑马 | 🦓 |
+
+---
+
 ## Badge System
 
 | Badge | Requirement | Icon |
@@ -321,7 +372,7 @@ streamlit run streamlit_app/app.py
 
 ---
 
-**Last Updated**: 2026-03-05
+**Last Updated**: 2026-03-08
 **Maintainer**: johnnyguogrit
 
 ---
@@ -330,6 +381,7 @@ streamlit run streamlit_app/app.py
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v1.5.0 | 2026-03-08 | Add student login with class codes - 8-letter class codes, 3-step login flow (Class Code → Name → Picture Password), separate teacher/student login UI, PDF credentials with class code |
 | v1.4.1 | 2026-03-05 | Fix st.button inside st.form error, add reset_admin.py script |
 | v1.4.0 | 2026-03-05 | Add animal picture passwords (Code.org style) - 12 animals with SVG icons, emoji display, and bilingual names |
 | v1.3.3 | 2026-03-05 | Fix SyntaxError caused by missing comma in import statement |
