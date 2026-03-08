@@ -3,7 +3,7 @@
 ## Project Overview
 
 **Project Name**: STEAM Quiz Platform
-**Version**: 1.6.0
+**Version**: 1.6.1
 **Repository**: https://github.com/johnnyguogrit/steam-quizzes
 **Deployment**: https://steam-quizzes.streamlit.app
 **Status**: Production ✅
@@ -381,6 +381,7 @@ Students use a child-friendly 3-step login process with class codes:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v1.6.1 | 2026-03-08 | Fix f-string braces bug ({{quiz_js}} -> {quiz_js}) causing quiz JS not to load, remove blocking time.sleep(), add button-based quiz result saving |
 | v1.6.0 | 2026-03-08 | Fix quiz progress tracking with st.javascript() - Use localStorage + st.javascript() polling for reliable quiz result saving, auto-seed database with admin and G1A class data on first run, persistent storage on Streamlit Cloud (/mount/data), admin password updated to Perfect@2025 |
 | v1.5.0 | 2026-03-08 | Add student login with class codes - 8-letter class codes, 3-step login flow (Class Code → Name → Picture Password), separate teacher/student login UI, PDF credentials with class code |
 | v1.4.1 | 2026-03-05 | Fix st.button inside st.form error, add reset_admin.py script |
