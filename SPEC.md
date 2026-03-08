@@ -3,7 +3,7 @@
 ## Project Overview
 
 **Project Name**: STEAM Quiz Platform
-**Version**: 1.5.0
+**Version**: 1.6.0
 **Repository**: https://github.com/johnnyguogrit/steam-quizzes
 **Deployment**: https://steam-quizzes.streamlit.app
 **Status**: Production ✅
@@ -274,8 +274,8 @@ streamlit run streamlit_app/app.py
 | - | (None required) | - |
 
 ### Known Limitations
-- **Data Persistence**: SQLite database resets on Streamlit Cloud redeploy
-  - **Mitigation**: Regular data exports, backup before updates
+- **Data Persistence**: Uses /mount/data for persistent storage on Streamlit Cloud (v1.6.0+)
+  - **Mitigation**: Auto-seed script available for initial setup
 - **Concurrent Users**: Limited by Streamlit's execution model
 - **File Upload**: Not implemented (uses static content only)
 
@@ -381,6 +381,7 @@ Students use a child-friendly 3-step login process with class codes:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v1.6.0 | 2026-03-08 | Fix quiz progress tracking with st.javascript() - Use localStorage + st.javascript() polling for reliable quiz result saving, auto-seed database with admin and G1A class data on first run, persistent storage on Streamlit Cloud (/mount/data), admin password updated to Perfect@2025 |
 | v1.5.0 | 2026-03-08 | Add student login with class codes - 8-letter class codes, 3-step login flow (Class Code → Name → Picture Password), separate teacher/student login UI, PDF credentials with class code |
 | v1.4.1 | 2026-03-05 | Fix st.button inside st.form error, add reset_admin.py script |
 | v1.4.0 | 2026-03-05 | Add animal picture passwords (Code.org style) - 12 animals with SVG icons, emoji display, and bilingual names |
