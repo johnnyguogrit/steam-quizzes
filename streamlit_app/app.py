@@ -10,11 +10,23 @@ import sys
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(__file__))
 
-from database import init_db
+from database import init_db, get_connection
 from auth import init_auth, login, is_authenticated, is_teacher, is_student, show_login_page, logout_button, get_current_user
 
 # Initialize database
 init_db()
+
+# Check if database needs seeding (no users exist)
+conn = get_connection()
+cursor = conn.cursor()
+cursor.execute("SELECT COUNT(*) as count FROM users")
+user_count = cursor.fetchone()[0]
+conn.close()
+
+# Auto-seed on first run
+if user_count == 0:
+    import seed_data
+    seed_data.seed_database()
 
 # Initialize authentication state
 init_auth()
