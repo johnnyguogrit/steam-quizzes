@@ -5,6 +5,7 @@ Displays the selected quiz and handles score submission.
 
 import streamlit as st
 import os
+import json
 from auth import require_auth, logout_button
 from config import get_quiz_by_id
 from database import record_quiz_attempt
@@ -59,7 +60,6 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # Get the quiz file path
-# Current file is in streamlit_app/pages/, need to go up two levels to repo root
 current_dir = os.path.dirname(os.path.abspath(__file__))
 base_dir = os.path.dirname(os.path.dirname(current_dir))
 quiz_path = os.path.join(base_dir, quiz['path'])
@@ -101,6 +101,7 @@ if os.path.exists(js_path):
         quiz_js = f.read()
 
 # Inject score reporting - store result in localStorage
+# NOTE: Use {{ for literal { in Python f-strings, and ${{ for literal ${ in JS template literals
 injected_js = f"""
 <script>
 // Streamlit Quiz Integration
@@ -109,6 +110,9 @@ injected_js = f"""
     window.userId = {st.session_state.user_id};
     window.startTime = Date.now();
     window.quizCompleted = false;
+
+    // Clear any old results when loading new quiz
+    localStorage.removeItem('steam_quiz_result');
 
     // Function to send score to Streamlit
     window.reportScore = function(score, total) {{
@@ -126,7 +130,7 @@ injected_js = f"""
                     <h2 style="color: #4caf50;">🎉 Quiz Completed!</h2>
                     <p style="font-size: 1.2rem;"><strong>Score: ${{score}}/${{total}} (${{percentage}}%)</strong></p>
                     <p>Time spent: ${{timeSpent}} seconds</p>
-                    <p style="color: #666;">Your result has been saved!</p>
+                    <p style="color: #666;">Your result has been saved! Click the button below to confirm.</p>
                 </div>
             `;
         }}
@@ -144,6 +148,7 @@ injected_js = f"""
 
         try {{
             localStorage.setItem('steam_quiz_result', JSON.stringify(result));
+            console.log('Result stored to localStorage:', result);
         }} catch (e) {{
             console.error('Error storing quiz result:', e);
         }}
@@ -250,16 +255,25 @@ except Exception as e:
     # Fallback to components.v1.html for older Streamlit versions
     st.components.v1.html(quiz_html, height=800, scrolling=True)
 
-# Poll for quiz completion - check localStorage periodically
-# Use a button to manually trigger result check when quiz is done
+# Save Result Button
 st.markdown("---")
 
-# Add a "Save My Result" button that students click after completing the quiz
+# Add a text input for students to paste their result (manual approach as fallback)
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
-    if st.button("✅ I have finished the quiz - Save my result", type="primary", key="save_quiz_result"):
-        # JavaScript to check localStorage and return the result
+    st.info("""
+    **After finishing the quiz:**
+    1. Click "Check Answers" to see your score
+    2. Open browser console (F12) and check if result was logged
+    3. Click the button below to save your result
+    """)
+
+    if st.button("✅ Save My Quiz Result", type="primary", key="save_quiz_result"):
+        # Use JavaScript to read localStorage and display the result
+        # We'll use st.components.v1.html to execute JS and return the value
         check_js = f"""
+        <html>
+        <body>
         <script>
         (function() {{
             const resultStr = localStorage.getItem('steam_quiz_result');
@@ -270,72 +284,94 @@ with col2:
 
                     // Only process if result is for this quiz and less than 5 minutes old
                     if (result.quizId === '{quiz_id}' && age < 300000) {{
-                        // Return the result via Streamlit component API
-                        if (typeof Streamlit !== 'undefined' && Streamlit.setComponentValue) {{
-                            Streamlit.setComponentValue(result);
-                            localStorage.removeItem('steam_quiz_result');
-                        }}
+                        // Set document.body to the result so Streamlit can read it
+                        document.body.innerHTML = resultStr;
+                        // Also try to set window.name for older Streamlit versions
+                        window.name = resultStr;
+                    }} else {{
+                        document.body.innerHTML = JSON.stringify({{error: 'No valid quiz result found. Please complete the quiz first.'}});
                     }}
                 }} catch (e) {{
-                    console.error('Error:', e);
+                    document.body.innerHTML = JSON.stringify({{error: 'Error reading result: ' + e.message}});
                 }}
             }} else {{
-                if (typeof Streamlit !== 'undefined' && Streamlit.setComponentValue) {{
-                    Streamlit.setComponentValue({{error: 'No quiz result found. Please complete the quiz first.'}});
-                }}
+                document.body.innerHTML = JSON.stringify({{error: 'No quiz result found in localStorage. Please complete the quiz first.'}});
             }}
         }})();
         </script>
+        </body>
+        </html>
         """
 
-        result_component = st.components.v1.html(check_js, height=0)
+        # The component returns the body.innerHTML as a string
+        result_component = st.components.v1.html(check_js, height=0, scrolling=False)
 
         # Process the result
         if result_component:
-            if isinstance(result_component, dict) and result_component.get('error'):
-                st.warning(result_component['error'])
-            elif isinstance(result_component, dict) and result_component.get('type') == 'quiz_completed':
-                data = result_component
+            try:
+                # result_component might be a string (body.innerHTML) or a dict
+                if isinstance(result_component, str):
+                    data = json.loads(result_component)
+                elif isinstance(result_component, dict):
+                    data = result_component
+                else:
+                    data = None
 
-                # Initialize quiz tracking in session state if not exists
-                if 'quiz_last_processed' not in st.session_state:
-                    st.session_state.quiz_last_processed = {}
+                if data and data.get('error'):
+                    st.warning(data['error'])
+                    st.info("💡 Make sure you:")
+                    st.info("1. Answered all questions")
+                    st.info("2. Clicked 'Check Answers' in the quiz")
+                    st.info("3. See the result displayed in the quiz")
 
-                # Create unique attempt key to prevent duplicate processing
-                attempt_key = f"{quiz_id}_{data.get('timestamp', '')}"
+                elif data and data.get('type') == 'quiz_completed':
+                    # Initialize quiz tracking in session state if not exists
+                    if 'quiz_last_processed' not in st.session_state:
+                        st.session_state.quiz_last_processed = {}
 
-                if not st.session_state.quiz_last_processed.get(attempt_key):
-                    # Record the quiz attempt
-                    record_quiz_attempt(
-                        st.session_state.user_id,
-                        data['quizId'],
-                        data['score'],
-                        data['total'],
-                        data.get('timeSpent', 0)
-                    )
+                    # Create unique attempt key to prevent duplicate processing
+                    attempt_key = f"{quiz_id}_{data.get('timestamp', '')}"
 
-                    percentage = round(data['score'] / data['total'] * 100)
+                    if not st.session_state.quiz_last_processed.get(attempt_key):
+                        # Record the quiz attempt
+                        record_quiz_attempt(
+                            st.session_state.user_id,
+                            data['quizId'],
+                            data['score'],
+                            data['total'],
+                            data.get('timeSpent', 0)
+                        )
 
-                    st.success(f"""
-                        🎉 **Quiz Completed!**
-                        - Score: {data['score']}/{data['total']} ({percentage}%)
-                        - Time: {data.get('timeSpent', 0)} seconds
+                        percentage = round(data['score'] / data['total'] * 100)
 
-                        Your result has been saved!
-                    """)
-                    st.balloons()
+                        st.success(f"""
+                            🎉 **Quiz Completed!**
+                            - Score: {data['score']}/{data['total']} ({percentage}%)
+                            - Time: {data.get('timeSpent', 0)} seconds
 
-                    # Mark as processed
-                    st.session_state.quiz_last_processed[attempt_key] = True
+                            Your result has been saved to the database!
+                        """)
+                        st.balloons()
 
-                    # Rerun to show success message
-                    st.rerun()
+                        # Mark as processed
+                        st.session_state.quiz_last_processed[attempt_key] = True
+
+                        # Clear localStorage
+                        st.components.v1.html("<script>localStorage.removeItem('steam_quiz_result');</script>", height=0)
+
+                        # Don't rerun immediately - let user see the success message
+            except json.JSONDecodeError:
+                st.error("Could not parse quiz result. Please try again.")
+            except Exception as e:
+                st.error(f"Error saving result: {e}")
+        else:
+            st.warning("No result received. Make sure you completed the quiz first.")
 
 # Instructions
 st.markdown("""
 ### Instructions
 1. Answer all questions by selecting the best option
 2. Click "Check Answers" when you're done
-3. Click the "Save My Result" button below to save your score
-4. You can retake the quiz to improve your score!
+3. Click the "Save My Quiz Result" button to save your score
+4. Check "My Progress" to see your updated statistics
 """)
