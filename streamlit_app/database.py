@@ -10,8 +10,16 @@ import os
 from datetime import datetime
 from typing import Optional, Dict, List
 
-# Database path
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "users.db")
+# Database path - use persistent storage on Streamlit Cloud
+# Streamlit Cloud provides /mount/data for persistent storage
+if os.path.exists("/mount/data"):
+    # Running on Streamlit Cloud - use persistent storage
+    DB_DIR = "/mount/data"
+else:
+    # Running locally - use local data directory
+    DB_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+
+DB_PATH = os.path.join(DB_DIR, "users.db")
 
 
 def get_connection():
