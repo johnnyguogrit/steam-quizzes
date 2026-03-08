@@ -87,6 +87,53 @@ if not os.path.exists(quiz_path):
     """)
     st.stop()
 
+# ============================================================================
+# CRITICAL: Set up message listener BEFORE displaying quiz
+# This ensures the listener is ready when the quiz sends its postMessage
+# ============================================================================
+
+# Use a hidden iframe to set up the message listener in the page
+listener_html = """
+<!DOCTYPE html>
+<html>
+<head>
+    <style>body { margin: 0; padding: 0; }</style>
+</head>
+<body>
+<script>
+(function() {
+    console.log('[Parent] Setting up message listener for quiz results...');
+
+    // Set up listener for quiz results from iframe
+    window.addEventListener('message', function(event) {
+        if (event.data && event.data.type === 'steam_quiz_result') {
+            const result = event.data.data;
+            console.log('[Parent] ✓ Received quiz result via postMessage:', result);
+
+            // Store in parent's localStorage
+            try {
+                localStorage.setItem('steam_quiz_result_parent', JSON.stringify(result));
+                console.log('[Parent] ✓ Stored to parent localStorage');
+            } catch (e) {
+                console.error('[Parent] ✗ Error storing to parent localStorage:', e);
+            }
+
+            // Store in window object as backup
+            window.steamQuizResult = result;
+            console.log('[Parent] ✓ Stored to window.steamQuizResult');
+        }
+    });
+
+    console.log('[Parent] Message listener is now active');
+})();
+</script>
+</body>
+</html>
+"""
+
+# Create a hidden iframe for the message listener
+st.components.v1.html(listener_html, height=0)
+
 # Read the original HTML
 with open(quiz_path, 'r', encoding='utf-8') as f:
     quiz_html = f.read()
@@ -150,12 +197,12 @@ injected_js = f"""
             timestamp: Date.now()
         }};
 
-        // Store in localStorage (iframe context)
+        // Store in localStorage (iframe context) - for debugging
         try {{
             localStorage.setItem('steam_quiz_result', JSON.stringify(result));
-            console.log('Result stored to localStorage (iframe):', result);
+            console.log('[Iframe] Result stored to localStorage:', result);
         }} catch (e) {{
-            console.error('Error storing quiz result:', e);
+            console.error('[Iframe] Error storing quiz result:', e);
         }}
 
         // Send postMessage to parent window (Streamlit main page)
@@ -164,12 +211,12 @@ injected_js = f"""
                 type: 'steam_quiz_result',
                 data: result
             }}, '*');
-            console.log('Result sent via postMessage to parent:', result);
+            console.log('[Iframe] Result sent via postMessage to parent:', result);
         }} catch (e) {{
-            console.error('Error sending postMessage:', e);
+            console.error('[Iframe] Error sending postMessage:', e);
         }}
 
-        console.log('Quiz completed:', {{ score, total, timeSpent }});
+        console.log('[Iframe] Quiz completed:', {{ score, total, timeSpent }});
     }};
 
     // Override checkAnswers function - MUST be loaded AFTER quiz JS
@@ -271,35 +318,6 @@ except Exception as e:
     # Fallback to components.v1.html for older Streamlit versions
     st.components.v1.html(quiz_html, height=800, scrolling=True)
 
-# Set up postMessage listener in parent page to receive quiz results
-# This JavaScript runs in the parent context, NOT in the iframe
-listener_setup = """
-<script>
-(function() {
-    // Set up listener for quiz results from iframe
-    window.addEventListener('message', function(event) {
-        // Verify the message is from our quiz
-        if (event.data && event.data.type === 'steam_quiz_result') {
-            const result = event.data.data;
-            console.log('Parent received quiz result via postMessage:', result);
-
-            // Store in parent's localStorage
-            try {
-                localStorage.setItem('steam_quiz_result_parent', JSON.stringify(result));
-                console.log('Stored to parent localStorage');
-            } catch (e) {
-                console.error('Error storing to parent localStorage:', e);
-            }
-
-            // Store in window object as backup
-            window.steamQuizResult = result;
-        }
-    });
-})();
-</script>
-"""
-st.markdown(listener_setup, unsafe_allow_html=True)
-
 # Save Result Button Section
 st.markdown("---")
 
@@ -319,12 +337,19 @@ with col2:
     if st.button("💾 Save My Quiz Result", type="primary", key="save_quiz_result"):
         # Read from parent's localStorage where postMessage stored the result
         check_js = """(function() {
+            console.log('[Save Button] Checking for quiz result...');
+
             // Try parent localStorage first (where postMessage stores)
             let resultStr = localStorage.getItem('steam_quiz_result_parent');
 
             // Fallback to window object
             if (!resultStr && window.steamQuizResult) {
                 resultStr = JSON.stringify(window.steamQuizResult);
+                console.log('[Save Button] Found result in window.steamQuizResult');
+            } else if (resultStr) {
+                console.log('[Save Button] Found result in parent localStorage');
+            } else {
+                console.log('[Save Button] No quiz result found in storage');
             }
 
             if (resultStr) {
@@ -334,7 +359,7 @@ with col2:
 
                     // Only process if result is less than 5 minutes old
                     if (age < 300000) {
-                        // Don't remove - allow re-saving if needed
+                        console.log('[Save Button] Returning valid result:', result);
                         return result;
                     } else {
                         return {error: 'Quiz result is too old. Please complete the quiz again.'};
