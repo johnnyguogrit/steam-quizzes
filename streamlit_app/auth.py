@@ -6,7 +6,8 @@ Handles login, logout, and session management.
 import streamlit as st
 from database import (
     authenticate_user, create_user, get_user, init_db, create_class,
-    ANIMAL_PASSWORDS, get_class_by_code, authenticate_student, get_students_by_class_code
+    ANIMAL_PASSWORDS, get_class_by_code, authenticate_student, get_students_by_class_code,
+    get_classes_by_teacher
 )
 
 
@@ -103,6 +104,22 @@ def require_teacher():
         st.stop()
 
 
+def get_all_classes_with_codes():
+    """Get all classes with their codes for the student login dropdown."""
+    from database import get_connection
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT c.id, c.name, c.class_code, c.grade_level
+        FROM classes c
+        WHERE c.class_code IS NOT NULL
+        ORDER BY c.name
+    """)
+    classes = [{"id": row[0], "name": row[1], "class_code": row[2], "grade_level": row[3]} for row in cursor.fetchall()]
+    conn.close()
+    return classes
+
+
 def show_student_login_page():
     """Display the child-friendly student login page with 3 steps."""
     st.set_page_config(page_title="Student Login", page_icon="👨‍🎓")
@@ -111,20 +128,21 @@ def show_student_login_page():
     st.session_state.login_view = "student"
 
     # Initialize session state for login steps
-    if "login_step" not in st.session_state:
-        st.session_state.login_step = 1
-    if "login_class_code" not in st.session_state:
-        st.session_state.login_class_code = ""
-    if "login_username" not in st.session_state:
-        st.session_state.login_username = ""
-    if "login_animal" not in st.session_state:
-        st.session_state.login_animal = None
+    if "student_step" not in st.session_state:
+        st.session_state.student_step = 1
+    if "student_class_id" not in st.session_state:
+        st.session_state.student_class_id = None
+    if "student_class_code" not in st.session_state:
+        st.session_state.student_class_code = ""
+    if "student_username" not in st.session_state:
+        st.session_state.student_username = ""
+    if "student_animal" not in st.session_state:
+        st.session_state.student_animal = None
 
     # Custom CSS for child-friendly UI
     st.markdown("""
         <style>
         .login-step { background: white; border-radius: 15px; padding: 25px; margin: 20px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .class-code-input { font-size: 2rem; text-align: center; letter-spacing: 5px; text-transform: uppercase; font-weight: bold; }
         .step-indicator { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
         .step-dot { width: 40px; height: 40px; border-radius: 50%; background: #e0e0e0; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         .step-active { background: #FF6B9D; color: white; }
@@ -138,9 +156,9 @@ def show_student_login_page():
 
         # Step indicator
         steps = [
-            ("step-complete" if st.session_state.login_step > 1 else "step-active", "1"),
-            ("step-active" if st.session_state.login_step == 2 else "step-complete" if st.session_state.login_step > 2 else "", "2"),
-            ("step-active" if st.session_state.login_step == 3 else "", "3"),
+            ("step-complete" if st.session_state.student_step > 1 else "step-active", "1"),
+            ("step-active" if st.session_state.student_step == 2 else "step-complete" if st.session_state.student_step > 2 else "", "2"),
+            ("step-active" if st.session_state.student_step == 3 else "", "3"),
         ]
         st.markdown(f"""
             <div class="step-indicator">
@@ -150,33 +168,38 @@ def show_student_login_page():
             </div>
         """, unsafe_allow_html=True)
 
-        # Step 1: Class Code
-        if st.session_state.login_step == 1:
-            st.markdown('<h2 style="text-align: center;">Step 1: Enter Class Code</h2>', unsafe_allow_html=True)
-            st.markdown('<p style="text-align: center; color: #666;">第一步：输入班级代码 (8个字母)</p>', unsafe_allow_html=True)
+        # Step 1: Select Class (from dropdown)
+        if st.session_state.student_step == 1:
+            st.markdown('<h2 style="text-align: center;">Step 1: Select Your Class</h2>', unsafe_allow_html=True)
+            st.markdown('<p style="text-align: center; color: #666;">第一步：选择你的班级</p>', unsafe_allow_html=True)
 
-            class_code = st.text_input("Class Code", max_chars=8, key="student_class_code", label_visibility="collapsed")
+            # Get all classes with codes
+            all_classes = get_all_classes_with_codes()
 
-            col_a, col_b, col_c = st.columns([1, 2, 1])
-            with col_b:
-                if st.button("Next 下一步", use_container_width=True, type="primary", key="student_next_1"):
-                    if class_code and len(class_code) == 8:
-                        if get_class_by_code(class_code.upper()):
-                            st.session_state.login_class_code = class_code.upper()
-                            st.session_state.login_step = 2
+            if all_classes:
+                # Create dropdown options showing class name and code
+                class_options = {f"{c['name']} ({c['class_code']})": c for c in all_classes}
+                selected = st.selectbox("Select Class 选择班级", options=list(class_options.keys()), key="student_class_select")
+
+                col_a, col_b, col_c = st.columns([1, 2, 1])
+                with col_b:
+                    if st.button("Next 下一步", use_container_width=True, type="primary", key="student_next_1"):
+                        if selected:
+                            cls = class_options[selected]
+                            st.session_state.student_class_id = str(cls["id"])
+                            st.session_state.student_class_code = cls["class_code"]
+                            st.session_state.student_step = 2
                             st.rerun()
-                        else:
-                            st.error("Class code not found. Please check with your teacher. 班级代码未找到，请询问老师。")
-                    else:
-                        st.warning("Please enter an 8-letter class code. 请输入8个字母的班级代码。")
+            else:
+                st.warning("No classes available. Please ask your teacher to create a class first. 没有班级，请联系老师。")
 
-        # Step 2: Username
-        elif st.session_state.login_step == 2:
+        # Step 2: Select Name
+        elif st.session_state.student_step == 2:
             st.markdown('<h2 style="text-align: center;">Step 2: Select Your Name</h2>', unsafe_allow_html=True)
             st.markdown('<p style="text-align: center; color: #666;">第二步：选择你的名字</p>', unsafe_allow_html=True)
-            st.markdown(f'<p style="text-align: center; color: #999;">Class: {st.session_state.login_class_code}</p>', unsafe_allow_html=True)
+            st.markdown(f'<p style="text-align: center; color: #999;">Class: {st.session_state.student_class_code}</p>', unsafe_allow_html=True)
 
-            students = get_students_by_class_code(st.session_state.login_class_code)
+            students = get_students_by_class_code(st.session_state.student_class_code)
 
             if students:
                 student_names = {s.get("full_name", s["username"]): s for s in students}
@@ -185,22 +208,22 @@ def show_student_login_page():
                 col_a, col_b, col_c = st.columns([1, 2, 1])
                 with col_a:
                     if st.button("Back 返回", use_container_width=True, key="student_back_2"):
-                        st.session_state.login_step = 1
+                        st.session_state.student_step = 1
                         st.rerun()
                 with col_c:
                     if st.button("Next 下一步", use_container_width=True, type="primary", key="student_next_2"):
                         if selected_name:
-                            st.session_state.login_username = student_names[selected_name]["username"]
-                            st.session_state.login_step = 3
+                            st.session_state.student_username = student_names[selected_name]["username"]
+                            st.session_state.student_step = 3
                             st.rerun()
             else:
                 st.error("No students found in this class. 这个班级没有找到学生。")
                 if st.button("Back 返回", use_container_width=True, key="student_back_2_empty"):
-                    st.session_state.login_step = 1
+                    st.session_state.student_step = 1
                     st.rerun()
 
         # Step 3: Picture Password
-        elif st.session_state.login_step == 3:
+        elif st.session_state.student_step == 3:
             st.markdown('<h2 style="text-align: center;">Step 3: Choose Your Picture Password</h2>', unsafe_allow_html=True)
             st.markdown('<p style="text-align: center; color: #666;">第三步：选择你的图片密码</p>', unsafe_allow_html=True)
 
@@ -209,7 +232,7 @@ def show_student_login_page():
             for idx, (num, animal) in enumerate(ANIMAL_PASSWORDS.items()):
                 col_idx = idx % 4
                 with cols[col_idx]:
-                    selected = st.session_state.login_animal == num
+                    selected = st.session_state.student_animal == num
                     # Use markdown to show emoji + text
                     label = f"{animal['emoji']} {animal['name']}\n{animal['chinese']}"
                     if st.button(
@@ -218,22 +241,22 @@ def show_student_login_page():
                         use_container_width=True,
                         type="primary" if selected else "secondary"
                     ):
-                        st.session_state.login_animal = num
+                        st.session_state.student_animal = num
                         st.rerun()
 
             st.markdown("---")
             col_a, col_b, col_c = st.columns([1, 2, 1])
             with col_a:
                 if st.button("Back 返回", use_container_width=True, key="student_back_3"):
-                    st.session_state.login_step = 2
+                    st.session_state.student_step = 2
                     st.rerun()
             with col_c:
                 if st.button("Login 登录", use_container_width=True, type="primary",
-                           disabled=st.session_state.login_animal is None, key="student_login_btn"):
+                           disabled=st.session_state.student_animal is None, key="student_login_btn"):
                     user = authenticate_student(
-                        st.session_state.login_class_code,
-                        st.session_state.login_username,
-                        st.session_state.login_animal
+                        st.session_state.student_class_code,
+                        st.session_state.student_username,
+                        st.session_state.student_animal
                     )
 
                     if user:
@@ -244,7 +267,7 @@ def show_student_login_page():
                         st.session_state.full_name = user.get("full_name", "")
                         st.session_state.class_id = user.get("class_id", "")
                         # Clear login state
-                        for key in ["login_step", "login_class_code", "login_username", "login_animal"]:
+                        for key in ["student_step", "student_class_id", "student_class_code", "student_username", "student_animal"]:
                             if key in st.session_state:
                                 del st.session_state[key]
                         st.rerun()
@@ -254,7 +277,7 @@ def show_student_login_page():
         # Back to selection button
         st.markdown("---")
         if st.button("← Back to Login Selection", use_container_width=True, key="student_to_selection"):
-            for key in ["login_step", "login_class_code", "login_username", "login_animal"]:
+            for key in ["student_step", "student_class_id", "student_class_code", "student_username", "student_animal"]:
                 if key in st.session_state:
                     del st.session_state[key]
             st.session_state.login_view = "selection"
@@ -314,8 +337,8 @@ def show_teacher_login_page():
                     st.warning("Please enter both username and password.")
 
         with tab2:
-            st.info("👋 First time here? Please contact your teacher to create an account.")
-            st.info("🔑 Teachers: Use the 'First Time Setup' tab to create your admin account.")
+            st.info("👋 First time here? Create your admin account.")
+            st.info("🔑 首次使用？请创建管理员账户。")
 
             admin_username = st.text_input("Admin Username", key="admin_username")
             admin_password = st.text_input("Admin Password", type="password", key="admin_password")
@@ -377,6 +400,10 @@ def show_login_page():
             padding: 40px;
             text-align: center;
             margin: 10px;
+        }
+        .role-btn {
+            height: 200px;
+            font-size: 1.5rem;
         }
         </style>
     """, unsafe_allow_html=True)
