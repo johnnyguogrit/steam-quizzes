@@ -3,7 +3,7 @@
 ## Project Overview
 
 **Project Name**: STEAM Quiz Platform
-**Version**: 1.6.8
+**Version**: 1.6.9
 **Repository**: https://github.com/johnnyguogrit/steam-quizzes
 **Deployment**: https://steam-quizzes.streamlit.app
 **Status**: Production ✅
@@ -381,6 +381,7 @@ Students use a child-friendly 3-step login process with class codes:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v1.6.9 | 2026-03-08 | Fix message listener timing - Set up postMessage listener BEFORE quiz loads to ensure messages are received
 | v1.6.8 | 2026-03-08 | Fix iframe communication - Use postMessage to bridge quiz iframe and parent page for reliable localStorage access
 | v1.6.7 | 2026-03-08 | Manual save button - Reliable quiz result saving with clear student instructions
 | v1.6.6 | 2026-03-08 | Add robust auto-save fallback - Dual-method (st.js + components.v1.html), streamlit>=1.33.0
