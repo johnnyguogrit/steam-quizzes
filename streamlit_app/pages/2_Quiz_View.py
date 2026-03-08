@@ -151,7 +151,7 @@ injected_js = f"""
         console.log('Quiz completed:', {{ score, total, timeSpent }});
     }};
 
-    // Override checkAnswers function
+    // Override checkAnswers function - MUST be loaded AFTER quiz JS
     const originalCheckAnswers = window.checkAnswers;
     if (typeof originalCheckAnswers === 'function') {{
         window.checkAnswers = function() {{
@@ -231,15 +231,17 @@ injected_js = f"""
 if quiz_css:
     quiz_html = quiz_html.replace('</head>', f'<style>{quiz_css}</style></head>')
 
-# Insert the injected JS before closing body tag
-if '</body>' in quiz_html:
-    quiz_html = quiz_html.replace('</body>', injected_js + '</body>')
-else:
-    quiz_html = quiz_html.replace('</html>', injected_js + '</html>')
-
-# Also append the original quiz JS
+# IMPORTANT: Insert quiz JS FIRST, then our injected JS AFTER
+# This ensures our override of checkAnswers works correctly
+scripts_to_insert = ''
 if quiz_js:
-    quiz_html = quiz_html.replace('</body>', f'<script>{quiz_js}</script></body>')
+    scripts_to_insert += f'<script>{quiz_js}</script>'
+scripts_to_insert += injected_js
+
+if '</body>' in quiz_html:
+    quiz_html = quiz_html.replace('</body>', scripts_to_insert + '</body>')
+else:
+    quiz_html = quiz_html.replace('</html>', scripts_to_insert + '</html>')
 
 # Display the quiz using st.html (Streamlit 1.31+)
 try:
