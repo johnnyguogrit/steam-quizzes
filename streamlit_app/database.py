@@ -735,3 +735,109 @@ def regenerate_class_passwords(class_id: str) -> list:
     conn.commit()
     conn.close()
     return results
+
+
+def get_students_by_class_first_attempts(class_id: str) -> List[Dict]:
+    """Get all students in a class with only their FIRST attempt for each quiz.
+    
+    This is used by teachers who only care about the first try score.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT u.*,
+               COUNT(first_attempts.id) as total_attempts,
+               AVG(CAST(first_attempts.score AS REAL) / CAST(first_attempts.total_questions AS REAL)) as avg_score
+        FROM users u
+        LEFT JOIN (
+            SELECT qa.*
+            FROM quiz_attempts qa
+            INNER JOIN (
+                SELECT user_id, quiz_id, MIN(id) as first_id
+                FROM quiz_attempts
+                GROUP BY user_id, quiz_id
+            ) first ON qa.id = first.first_id
+        ) first_attempts ON u.id = first_attempts.user_id
+        WHERE u.class_id = ? AND u.role = 'student'
+        GROUP BY u.id
+        ORDER BY u.full_name
+        """,
+        (class_id,)
+    )
+    students = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return students
+
+
+def get_class_statistics_first_attempts(class_id: str) -> Dict:
+    """Get statistics for a class using only FIRST attempts."""
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # Total students
+    cursor.execute(
+        "SELECT COUNT(*) as count FROM users WHERE class_id = ? AND role = 'student'",
+        (class_id,)
+    )
+    total_students = cursor.fetchone()["count"]
+
+    # Total first attempts
+    cursor.execute(
+        """
+        SELECT COUNT(*) as count FROM quiz_attempts qa
+        JOIN users u ON qa.user_id = u.id
+        WHERE u.class_id = ?
+        AND qa.id IN (
+            SELECT MIN(id) FROM quiz_attempts qa2
+            WHERE qa2.user_id = qa.user_id AND qa2.quiz_id = qa.quiz_id
+        )
+        """,
+        (class_id,)
+    )
+    total_attempts = cursor.fetchone()["count"]
+
+    # Average score (first attempts only)
+    cursor.execute(
+        """
+        SELECT AVG(CAST(qa.score AS REAL) / qa.total_questions) as avg_score
+        FROM quiz_attempts qa
+        JOIN users u ON qa.user_id = u.id
+        WHERE u.class_id = ?
+        AND qa.id IN (
+            SELECT MIN(id) FROM quiz_attempts qa2
+            WHERE qa2.user_id = qa.user_id AND qa2.quiz_id = qa.quiz_id
+        )
+        """,
+        (class_id,)
+    )
+    avg_score = cursor.fetchone()["avg_score"] or 0
+
+    # Quizzes by performance (first attempts only)
+    cursor.execute(
+        """
+        SELECT qa.quiz_id,
+               COUNT(*) as attempts,
+               AVG(CAST(qa.score AS REAL) / qa.total_questions) as avg_score
+        FROM quiz_attempts qa
+        JOIN users u ON qa.user_id = u.id
+        WHERE u.class_id = ?
+        AND qa.id IN (
+            SELECT MIN(id) FROM quiz_attempts qa2
+            WHERE qa2.user_id = qa.user_id AND qa2.quiz_id = qa.quiz_id
+        )
+        GROUP BY qa.quiz_id
+        ORDER BY quiz_id
+        """,
+        (class_id,)
+    )
+    quiz_performance = [dict(row) for row in cursor.fetchall()]
+
+    conn.close()
+
+    return {
+        "total_students": total_students,
+        "total_attempts": total_attempts,
+        "average_score": round(avg_score * 100, 1),
+        "quiz_performance": quiz_performance
+    }

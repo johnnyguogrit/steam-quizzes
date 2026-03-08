@@ -7,6 +7,7 @@ import streamlit as st
 import pandas as pd
 import io
 from database import (
+    get_students_by_class_first_attempts, get_class_statistics_first_attempts,
     get_user, create_user, get_classes_by_teacher, get_students_by_class,
     get_class_statistics, export_class_data, create_class, get_all_users,
     delete_user, delete_class, get_user_attempts, generate_graphical_password,
@@ -291,7 +292,9 @@ teacher = get_current_user()
 
 with tab1:
     st.header("📊 Overview")
-
+    
+    st.info("📌 **First Attempts Only**: Teachers only see the FIRST attempt score for each quiz. Subsequent practice attempts are not counted in these statistics.")
+    
     classes = get_classes_by_teacher(teacher["id"])
 
     if classes:
@@ -310,7 +313,7 @@ with tab1:
 
         for cls in classes:
             with st.expander(f"📚 {cls['name']}"):
-                stats = get_class_statistics(str(cls["id"]))
+                stats = get_class_statistics_first_attempts(str(cls["id"]))
 
                 col1, col2, col3, col4 = st.columns(4)
                 with col1:
@@ -329,6 +332,8 @@ with tab1:
 
 with tab2:
     st.header("👥 Manage Classes & Students")
+    
+    st.info("📌 **First Attempts Only**: Student scores shown are their FIRST attempt only. This is for fair assessment.")
 
     classes = get_classes_by_teacher(teacher["id"])
 
@@ -374,7 +379,7 @@ with tab2:
                         try:
                             if delete_class(cls["id"]):
                                 # Clean up passwords from session state
-                                students = get_students_by_class(str(cls["id"]))
+                                students = get_students_by_class_first_attempts(str(cls["id"]))
                                 for s in students:
                                     if s["id"] in st.session_state.student_passwords:
                                         del st.session_state.student_passwords[s["id"]]
@@ -464,7 +469,7 @@ with tab2:
                                 st.rerun()
 
             # Show students list
-            students = get_students_by_class(str(cls["id"]))
+            students = get_students_by_class_first_attempts(str(cls["id"]))
 
             if students:
                 st.markdown("#### Student List")
