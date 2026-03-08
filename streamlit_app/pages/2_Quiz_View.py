@@ -105,7 +105,7 @@ if os.path.exists(js_path):
     with open(js_path, 'r', encoding='utf-8') as f:
         quiz_js = f.read()
 
-# Inject score reporting - store result in localStorage for manual save button
+# Inject score reporting with postMessage to communicate from iframe to parent
 injected_js = f"""
 <script>
 // Streamlit Quiz Integration
@@ -115,10 +115,10 @@ injected_js = f"""
     window.startTime = Date.now();
     window.quizCompleted = false;
 
-    // Clear any old results when loading new quiz
+    // Clear any old results
     localStorage.removeItem('steam_quiz_result');
 
-    // Function to send score to server and update UI
+    // Function to send score via postMessage to parent window
     window.reportScore = function(score, total) {{
         if (window.quizCompleted) return;
         window.quizCompleted = true;
@@ -126,7 +126,7 @@ injected_js = f"""
         const timeSpent = Math.round((Date.now() - window.startTime) / 1000);
         const percentage = Math.round((score / total) * 100);
 
-        // Update the results display
+        // Update the results display in the quiz
         const resultsDiv = document.getElementById('streamlit-quiz-results');
         if (resultsDiv) {{
             resultsDiv.innerHTML = `
@@ -139,7 +139,7 @@ injected_js = f"""
             `;
         }}
 
-        // Store result in localStorage for manual save button
+        // Create result object
         const result = {{
             type: 'quiz_completed',
             quizId: "{quiz_id}",
@@ -150,11 +150,23 @@ injected_js = f"""
             timestamp: Date.now()
         }};
 
+        // Store in localStorage (iframe context)
         try {{
             localStorage.setItem('steam_quiz_result', JSON.stringify(result));
-            console.log('Result stored to localStorage:', result);
+            console.log('Result stored to localStorage (iframe):', result);
         }} catch (e) {{
             console.error('Error storing quiz result:', e);
+        }}
+
+        // Send postMessage to parent window (Streamlit main page)
+        try {{
+            window.parent.postMessage({{
+                type: 'steam_quiz_result',
+                data: result
+            }}, '*');
+            console.log('Result sent via postMessage to parent:', result);
+        }} catch (e) {{
+            console.error('Error sending postMessage:', e);
         }}
 
         console.log('Quiz completed:', {{ score, total, timeSpent }});
@@ -259,6 +271,35 @@ except Exception as e:
     # Fallback to components.v1.html for older Streamlit versions
     st.components.v1.html(quiz_html, height=800, scrolling=True)
 
+# Set up postMessage listener in parent page to receive quiz results
+# This JavaScript runs in the parent context, NOT in the iframe
+listener_setup = """
+<script>
+(function() {
+    // Set up listener for quiz results from iframe
+    window.addEventListener('message', function(event) {
+        // Verify the message is from our quiz
+        if (event.data && event.data.type === 'steam_quiz_result') {
+            const result = event.data.data;
+            console.log('Parent received quiz result via postMessage:', result);
+
+            // Store in parent's localStorage
+            try {
+                localStorage.setItem('steam_quiz_result_parent', JSON.stringify(result));
+                console.log('Stored to parent localStorage');
+            } catch (e) {
+                console.error('Error storing to parent localStorage:', e);
+            }
+
+            // Store in window object as backup
+            window.steamQuizResult = result;
+        }
+    });
+})();
+</script>
+"""
+st.markdown(listener_setup, unsafe_allow_html=True)
+
 # Save Result Button Section
 st.markdown("---")
 
@@ -276,46 +317,45 @@ with col2:
         st.warning("📝 **Practice Mode** - This won't be recorded")
 
     if st.button("💾 Save My Quiz Result", type="primary", key="save_quiz_result"):
-        # Get result from localStorage
-        check_js = f"""
-        <html>
-        <body>
-        <script>
-        (function() {{
-            const resultStr = localStorage.getItem('steam_quiz_result');
-            if (resultStr) {{
-                try {{
+        # Read from parent's localStorage where postMessage stored the result
+        check_js = """(function() {
+            // Try parent localStorage first (where postMessage stores)
+            let resultStr = localStorage.getItem('steam_quiz_result_parent');
+
+            // Fallback to window object
+            if (!resultStr && window.steamQuizResult) {
+                resultStr = JSON.stringify(window.steamQuizResult);
+            }
+
+            if (resultStr) {
+                try {
                     const result = JSON.parse(resultStr);
                     const age = Date.now() - (result.timestamp || 0);
 
-                    // Only process if result is for this quiz and less than 5 minutes old
-                    if (result.quizId === '{quiz_id}' && age < 300000) {{
-                        localStorage.removeItem('steam_quiz_result');
-                        document.body.innerHTML = resultStr;
-                    }} else {{
-                        document.body.innerHTML = JSON.stringify({{error: 'No valid quiz result found. Please complete the quiz first.'}});
-                    }}
-                }} catch (e) {{
-                    document.body.innerHTML = JSON.stringify({{error: 'Error: ' + e.message}});
-                }}
-            }} else {{
-                document.body.innerHTML = JSON.stringify({{error: 'No quiz result found. Please complete the quiz first and click Check Answers.'}});
-            }}
-        }})();
-        </script>
-        </body>
-        </html>
-        """
+                    // Only process if result is less than 5 minutes old
+                    if (age < 300000) {
+                        // Don't remove - allow re-saving if needed
+                        return result;
+                    } else {
+                        return {error: 'Quiz result is too old. Please complete the quiz again.'};
+                    }
+                } catch (e) {
+                    return {error: 'Error parsing result: ' + e.message};
+                }
+            } else {
+                return {error: 'No quiz result found. Please complete the quiz first and click Check Answers.'};
+            }
+        })()"""
 
-        result_component = st.components.v1.html(check_js, height=0)
+        # Try st.js() first (Streamlit 1.33+)
+        try:
+            result = st.js(check_js)
 
-        # Process the result
-        if result_component:
-            try:
-                if isinstance(result_component, str):
-                    data = json.loads(result_component)
-                elif isinstance(result_component, dict):
-                    data = result_component
+            if result:
+                if isinstance(result, str):
+                    data = json.loads(result)
+                elif isinstance(result, dict):
+                    data = result
                 else:
                     data = None
 
@@ -324,7 +364,7 @@ with col2:
                     st.info("💡 Make sure you:")
                     st.info("1. ✅ Answered all questions")
                     st.info("2. ✅ Clicked 'Check Answers' in the quiz")
-                    st.info("3. ✅ See your score displayed in the quiz")
+                    st.info("3. ✅ Waited for the score to appear")
 
                 elif data and data.get('type') == 'quiz_completed' and is_first_attempt:
                     # Initialize quiz tracking in session state if not exists
@@ -361,10 +401,10 @@ with col2:
                 elif data and data.get('type') == 'quiz_completed' and not is_first_attempt:
                     st.info("📝 This was a practice attempt. Your score was not recorded (only first attempts count).")
 
-            except json.JSONDecodeError:
-                st.error("Could not parse quiz result. Please try again.")
-            except Exception as e:
-                st.error(f"Error saving result: {e}")
+        except AttributeError:
+            # st.js() not available, show error message
+            st.error("⚠️ Streamlit 1.33+ required for quiz saving. Please update Streamlit or contact your teacher.")
+            st.info("For teachers: Run `pip install --upgrade streamlit` to enable quiz result saving.")
 
 # Instructions
 st.markdown("""
