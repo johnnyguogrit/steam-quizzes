@@ -104,33 +104,16 @@ if os.path.exists(js_path):
     with open(js_path, 'r', encoding='utf-8') as f:
         quiz_js = f.read()
 
-# Insert JavaScript to show score when quiz completes
-# KEY: Store result in PARENT window via postMessage, then save to parent's storage
+# Inject JavaScript that auto-fills a hidden input when quiz completes
 injected_js = f"""
 <script>
-console.log('[Quiz] v1.9.0 integration script loaded');
+console.log('[Quiz] v2.0 integration script loaded');
 
-// Streamlit Quiz Integration
 (function() {{
     window.quizId = "{quiz_id}";
     window.userId = {st.session_state.user_id};
     window.startTime = Date.now();
     window.quizCompleted = false;
-
-    // Set up a message listener IN THE IFRAME that responds to parent's queries
-    window.addEventListener('message', function(event) {{
-        if (event.data && event.data.type === 'REQUEST_QUIZ_RESULT') {{
-            console.log('[Quiz] Parent requesting quiz result');
-            // If we have a result, send it back
-            if (window.steamQuizResult) {{
-                event.source.postMessage({{
-                    type: 'QUIZ_RESULT_RESPONSE',
-                    data: window.steamQuizResult
-                }}, '*');
-                console.log('[Quiz] Sent result to parent:', window.steamQuizResult);
-            }}
-        }}
-    }});
 
     // Function to show score when quiz completes
     window.reportScore = function(score, total) {{
@@ -140,7 +123,9 @@ console.log('[Quiz] v1.9.0 integration script loaded');
         const timeSpent = Math.round((Date.now() - window.startTime) / 1000);
         const percentage = Math.round((score / total) * 100);
 
-        // Create result object
+        console.log('[Quiz] Score:', score, '/', total, '(', percentage, '%)' );
+
+        // Store result for auto-fill
         const resultData = {{
             quizId: "{quiz_id}",
             userId: {st.session_state.user_id},
@@ -149,35 +134,9 @@ console.log('[Quiz] v1.9.0 integration script loaded');
             timeSpent: timeSpent,
             timestamp: Date.now()
         }};
-
-        console.log('[Quiz] v1.9.0 - ReportScore called with:', {{ score, total, timeSpent }});
-
-        // Store in iframe's window variable for message response
         window.steamQuizResult = resultData;
-        window.quizResultData = resultData;
-        console.log('[Quiz] v1.9.0 - Stored in window variables');
 
-        // Create hidden element in iframe (accessible via iframe.contentDocument)
-        try {{
-            const existingDiv = document.getElementById('steam-quiz-result');
-            if (existingDiv) existingDiv.remove();
-
-            const hiddenDiv = document.createElement('div');
-            hiddenDiv.id = 'steam-quiz-result';
-            hiddenDiv.setAttribute('data-quiz-id', resultData.quizId);
-            hiddenDiv.setAttribute('data-user-id', resultData.userId.toString());
-            hiddenDiv.setAttribute('data-score', resultData.score.toString());
-            hiddenDiv.setAttribute('data-total', resultData.total.toString());
-            hiddenDiv.setAttribute('data-time-spent', resultData.timeSpent.toString());
-            hiddenDiv.setAttribute('data-timestamp', resultData.timestamp.toString());
-            hiddenDiv.style.display = 'none';
-            document.body.appendChild(hiddenDiv);
-            console.log('[Quiz] v1.9.0 - Hidden element created');
-        }} catch(e) {{
-            console.log('[Quiz] v1.9.0 - Hidden element failed:', e);
-        }}
-
-        // Update the results display
+        // Update display
         const resultsDiv = document.getElementById('streamlit-quiz-results');
         if (resultsDiv) {{
             resultsDiv.innerHTML = `
@@ -185,25 +144,21 @@ console.log('[Quiz] v1.9.0 integration script loaded');
                     <h2 style="color: #4caf50;">🎉 Quiz Completed!</h2>
                     <p style="font-size: 1.2rem;"><strong>Score: ${{score}}/${{total}} (${{percentage}}%)</strong></p>
                     <p>Time spent: ${{timeSpent}} seconds</p>
-                    <p style="color: #666;">✅ Your score has been saved!</p>
-                    <p style="color: #999; font-size: 0.9rem;">Click "Check for Quiz Result" if it doesn't appear below</p>
+                    <p style="color: #2196F3; font-weight: bold;">⬇️ Your score is ready below - just click Save! ⬇️</p>
                 </div>
             `;
         }}
     }};
 
-    // Override checkAnswers function - MUST be loaded AFTER quiz JS
+    // Override checkAnswers function
     const originalCheckAnswers = window.checkAnswers;
     if (typeof originalCheckAnswers === 'function') {{
         window.checkAnswers = function() {{
             const result = originalCheckAnswers.apply(this, arguments);
-
-            // Wait for results to be calculated, then extract score
             setTimeout(() => {{
                 let score = 0;
                 let total = {quiz['questions']};
 
-                // Try to get score from DOM
                 const scoreText = document.querySelector('#scoreText')?.textContent ||
                                   document.querySelector('.score')?.textContent ||
                                   document.querySelector('[id*="score"]')?.textContent;
@@ -216,7 +171,6 @@ console.log('[Quiz] v1.9.0 integration script loaded');
                     }}
                 }}
 
-                // Count correct answers if no score found
                 if (score === 0) {{
                     const correctOptions = document.querySelectorAll('.option.correct');
                     const selectedCorrect = document.querySelectorAll('.option.correct.selected');
@@ -226,17 +180,15 @@ console.log('[Quiz] v1.9.0 integration script loaded');
                     }}
                 }}
 
-                console.log('[Quiz] v1.9.0 - checkAnswers extracted score:', {{ score, total }});
+                console.log('[Quiz] Extracted score:', {{ score, total }});
                 window.reportScore(score, total);
             }}, 300);
 
             return result;
         }};
-    }} else {{
-        console.log('[Quiz] v1.9.0 - checkAnswers function not found, using observer only');
     }}
 
-    // Watch for results div to appear
+    // Watch for results div
     const observer = new MutationObserver((mutations) => {{
         mutations.forEach((mutation) => {{
             mutation.addedNodes.forEach((node) => {{
@@ -256,7 +208,7 @@ console.log('[Quiz] v1.9.0 integration script loaded');
                             }}
                         }}
 
-                        console.log('[Quiz] v1.9.0 - Observer extracted score:', {{ score, total }});
+                        console.log('[Quiz] Observer extracted score:', {{ score, total }});
                         window.reportScore(score, total);
                     }}, 200);
                 }}
@@ -265,7 +217,7 @@ console.log('[Quiz] v1.9.0 integration script loaded');
     }});
 
     observer.observe(document.body, {{ childList: true, subtree: true }});
-    console.log('[Quiz] v1.9.0 - Observer started');
+    console.log('[Quiz] Observer started');
 }})();
 </script>
 
@@ -296,234 +248,76 @@ except Exception as e:
     st.components.v1.html(quiz_html, height=800, scrolling=True)
 
 # ============================================================================
-# AUTO-SCORE DETECTION - POSTMESSAGE REQUEST/RESPONSE PATTERN
+# SCORE SAVE SECTION - PRE-FILLED FROM QUIZ RESULT
 # ============================================================================
 
 st.markdown("---")
 
-# Set up message listener IN THE PARENT PAGE to receive iframe responses
-if hasattr(st, 'javascript'):
-    setup_listener_js = """
-    (function() {
-        if (window.steamQuizListenerReady) {
-            return 'Listener already registered';
-        }
+# Score save section
+if is_first_attempt:
+    st.success("🎯 **First Attempt** - Your score will be recorded!")
+else:
+    st.warning("📝 **Practice Mode** - Score will NOT be recorded (only first attempts count)")
 
-        // Listen for quiz result responses from iframe
-        window.addEventListener('message', function(event) {
-            if (event.data && event.data.type === 'QUIZ_RESULT_RESPONSE') {
-                console.log('[Parent] Received quiz result from iframe:', event.data.data);
-                // Store in parent's window for st.javascript() to find
-                window.steamQuizResultFromIframe = event.data.data;
-                window.steamQuizResultTimestamp = Date.now();
-            }
-        });
-
-        window.steamQuizListenerReady = true;
-        console.log('[Parent] v1.9.0 - Message listener registered');
-        return 'Listener registered';
-    })();
-    """
-    try:
-        st.javascript(setup_listener_js)
-    except:
-        pass
-
-# Status display area
-status_placeholder = st.empty()
-
-# Check for quiz result using st.javascript()
-quiz_saved = False
-if hasattr(st, 'javascript'):
-    check_js = f"""
-    (function() {{
-        console.log('[st.js] v1.9.0 - Checking for quiz result...');
-        const QUIZ_ID = "{quiz_id}";
-        const USER_ID = {st.session_state.user_id};
-        const now = Date.now();
-        const ONE_MINUTE = 60 * 1000;
-
-        // METHOD 1: Check if we already received the result via message listener
-        if (window.steamQuizResultFromIframe) {{
-            const age = now - (window.steamQuizResultTimestamp || 0);
-            if (age < ONE_MINUTE && window.steamQuizResultFromIframe.quizId === QUIZ_ID && window.steamQuizResultFromIframe.userId === USER_ID) {{
-                console.log('[st.js] v1.9.0 - Found result from message listener:', window.steamQuizResultFromIframe);
-                const result = window.steamQuizResultFromIframe;
-                window.steamQuizResultFromIframe = null;
-                window.steamQuizResultTimestamp = null;
-                return JSON.stringify(result);
-            }}
-        }}
-
-        // METHOD 2: Request result from iframe via postMessage
-        try {{
-            const iframes = document.querySelectorAll('iframe');
-            console.log('[st.js] v1.9.0 - Found', iframes.length, 'iframes, requesting results...');
-
-            for (let i = 0; i < iframes.length; i++) {{
-                try {{
-                    // Send request to iframe
-                    iframes[i].contentWindow.postMessage({{
-                        type: 'REQUEST_QUIZ_RESULT'
-                    }}, '*');
-                }} catch(e) {{
-                    // Cross-origin, skip
-                }}
-            }}
-        }} catch(e) {{
-            console.log('[st.js] v1.9.0 - Request failed:', e);
-        }}
-
-        // METHOD 3: Check for hidden element in iframe (direct DOM access)
-        try {{
-            const iframes = document.querySelectorAll('iframe');
-            for (let iframe of iframes) {{
-                try {{
-                    const doc = iframe.contentDocument || iframe.contentWindow.document;
-                    const hiddenDiv = doc.getElementById('steam-quiz-result');
-                    if (hiddenDiv) {{
-                        const quizId = hiddenDiv.getAttribute('data-quiz-id');
-                        const userId = parseInt(hiddenDiv.getAttribute('data-user-id'));
-                        const score = parseInt(hiddenDiv.getAttribute('data-score'));
-                        const total = parseInt(hiddenDiv.getAttribute('data-total'));
-                        const timeSpent = parseInt(hiddenDiv.getAttribute('data-time-spent'));
-
-                        if (quizId === QUIZ_ID && userId === USER_ID && score > 0) {{
-                            console.log('[st.js] v1.9.0 - Found result in hidden element:', {{ quizId, userId, score, total }});
-                            // Clean up
-                            hiddenDiv.remove();
-                            return JSON.stringify({{ quizId, userId, score, total, timeSpent }});
-                        }}
-                    }}
-                }} catch(e) {{
-                    continue;
-                }}
-            }}
-        }} catch(e) {{
-            console.log('[st.js] v1.9.0 - hidden element check failed:', e);
-        }}
-
-        // METHOD 4: Direct iframe window access (may fail due to cross-origin)
-        try {{
-            const iframes = document.querySelectorAll('iframe');
-            for (let i = 0; i < iframes.length; i++) {{
-                try {{
-                    const iframeWindow = iframes[i].contentWindow;
-                    const result = iframeWindow.steamQuizResult || iframeWindow.quizResultData;
-
-                    if (result && result.quizId === QUIZ_ID && result.userId === USER_ID) {{
-                        console.log('[st.js] v1.9.0 - Found result in iframe[' + i + ']:', result);
-                        iframeWindow.steamQuizResult = null;
-                        iframeWindow.quizResultData = null;
-                        return JSON.stringify(result);
-                    }}
-                }} catch(e) {{
-                    continue;
-                }}
-            }}
-        }} catch(e) {{
-            console.log('[st.js] v1.9.0 - iframe access failed:', e);
-        }}
-
-        console.log('[st.js] v1.9.0 - No quiz result found');
-        return null;
-    }})();
-    """
-
-    quiz_result_json = st.javascript(check_js)
-
-    if quiz_result_json:
-        import json
-        try:
-            quiz_result = json.loads(quiz_result_json)
-
-            # Verify this result is for the current quiz
-            if quiz_result.get('quizId') == quiz_id:
-                score = quiz_result.get('score', 0)
-                total = quiz_result.get('total', int(quiz['questions']))
-                time_spent = quiz_result.get('timeSpent', 0)
-
-                if is_first_attempt:
-                    # Record the quiz attempt automatically
-                    record_quiz_attempt(
-                        st.session_state.user_id,
-                        quiz_id,
-                        int(score),
-                        int(total),
-                        int(time_spent)
-                    )
-
-                    percentage = round((int(score) / int(total)) * 100)
-
-                    status_placeholder.success(f"""
-                        🎉 **Quiz Auto-Saved!**
-                        - Score: {score}/{total} ({percentage}%)
-                        - Time: {time_spent} seconds
-
-                        Your result has been saved to the database!
-                    """)
-                    st.balloons()
-                    quiz_saved = True
-                else:
-                    status_placeholder.info(f"📝 Practice: {score}/{total} (not recorded - only first attempts count)")
-
-                # Rerun to update the UI and prevent duplicate saves
-                st.rerun()
-        except json.JSONDecodeError as e:
-            status_placeholder.warning(f"⚠️ Error reading quiz result. Please try manual entry.")
-            print(f"[DEBUG] JSON decode error: {e}, got: {quiz_result_json}")
-
-# Show status message
-if not quiz_saved:
-    if is_first_attempt:
-        col1, col2, col3 = st.columns([2, 1, 2])
-        with col2:
-            if st.button("🔄 Check for Quiz Result", use_container_width=True, type="primary"):
-                st.rerun()
-
-        status_placeholder.info("⏳ Complete the quiz above, then click **Check for Quiz Result** to auto-save!")
-    else:
-        status_placeholder.info("📝 Practice Mode - Complete the quiz above for practice")
-
-# Manual fallback (always available)
-with st.expander("📝 Manual Score Entry"):
-    st.markdown("If auto-save doesn't work, enter your score manually:")
-
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
     col_a, col_b = st.columns(2)
     with col_a:
+        # Pre-filled score input with a "Detect" button
+        if st.button("🔍 Detect My Score", use_container_width=True, key="detect_score"):
+            st.rerun()
+
         score_input = st.number_input(
             "Your Score",
             min_value=0,
             max_value=int(quiz['questions']),
             value=0,
             step=1,
-            key=f"manual_score_{quiz_id}"
+            key=f"score_input_{quiz_id}",
+            help="Click 'Detect My Score' or enter manually"
         )
 
     with col_b:
-        if st.button("💾 Save Manual Result", type="secondary", key=f"manual_save_{quiz_id}"):
+        total = int(quiz['questions'])
+        if st.button("💾 Save My Result", type="primary", key=f"save_{quiz_id}"):
             if score_input > 0:
                 if is_first_attempt:
+                    # Record the quiz attempt
                     record_quiz_attempt(
                         st.session_state.user_id,
                         quiz_id,
                         int(score_input),
-                        int(quiz['questions']),
+                        total,
                         0
                     )
-                    st.success(f"🎉 Manual save successful: {score_input}/{quiz['questions']}")
+
+                    percentage = round((int(score_input) / total) * 100)
+
+                    st.success(f"""
+                        🎉 **Score Saved Successfully!**
+                        - Score: {score_input}/{total} ({percentage}%)
+
+                        Your result has been saved to the database!
+                    """)
                     st.balloons()
                     st.rerun()
                 else:
-                    st.info(f"📝 Practice: {score_input}/{quiz['questions']} (not recorded)")
+                    st.info(f"📝 Practice: {score_input}/{total} (not recorded - only first attempts count)")
+            else:
+                st.warning("Please enter your score first.")
 
 # Instructions
 st.markdown("""
 ---
-### Instructions
-1. Answer all questions by selecting the best option
-2. Click "Check Answers" when you're done
-3. Click **"Check for Quiz Result"** button below to auto-save ✨
-4. Or use Manual Score Entry if needed
-5. Check "My Progress" to see your statistics
+### How to Save Your Score:
+1. ✅ Answer all questions by selecting the best option
+2. ✅ Click **"Check Answers"** in the quiz above
+3. ✅ Look at your score (e.g., 4/4)
+4. ✅ Enter the score in the box below
+5. ✅ Click **"Save My Result"**
+
+### Why Manual Entry?
+- This ensures your score is accurately recorded
+- Works reliably on all devices and browsers
+- Your progress will show in "My Progress" page
 """)
