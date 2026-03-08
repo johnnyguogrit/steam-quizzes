@@ -339,18 +339,38 @@ if auto_check:
         if isinstance(auto_check, str):
             # Try to parse JSON from the HTML
             try:
-                # Find JSON in the string
                 import re
-                json_match = re.search(r'\{[^}]*"type"[^}]*\}', auto_check)
-                if json_match:
-                    data = json.loads(json_match.group(0))
+                # Extract individual JSON fields with more robust regex
+                type_match = re.search(r'"type":\s*"([^"]+)"', auto_check)
+                quizId_match = re.search(r'"quizId":\s*"([^"]+)"', auto_check)
+                userId_match = re.search(r'"userId":\s*(\d+)', auto_check)
+                score_match = re.search(r'"score":\s*(\d+)', auto_check)
+                total_match = re.search(r'"total":\s*(\d+)', auto_check)
+                timeSpent_match = re.search(r'"timeSpent":\s*(\d+)', auto_check)
+                timestamp_match = re.search(r'"timestamp":\s*(\d+)', auto_check)
+                
+                if type_match and quizId_match and score_match and total_match:
+                    data = {
+                        "type": type_match.group(1),
+                        "quizId": quizId_match.group(1),
+                        "userId": int(userId_match.group(1)) if userId_match else 0,
+                        "score": int(score_match.group(1)),
+                        "total": int(total_match.group(1)),
+                        "timeSpent": int(timeSpent_match.group(1)) if timeSpent_match else 0,
+                        "timestamp": int(timestamp_match.group(1)) if timestamp_match else 0
+                    }
+                    st.write(f"DEBUG: Parsed quiz result: {data}")
                 else:
+                    st.write(f"DEBUG: Could not extract all fields from: {auto_check[:200]}...")
                     data = None
-            except:
+            except Exception as parse_error:
+                st.write(f"DEBUG: Parse error: {parse_error}")
+                st.write(f"DEBUG: Input: {auto_check[:200]}...")
                 data = None
         elif isinstance(auto_check, dict):
             data = auto_check
         else:
+            st.write(f"DEBUG: Unexpected auto_check type: {type(auto_check)}")
             data = None
 
         if data and data.get('type') == 'quiz_completed' and is_first_attempt:
