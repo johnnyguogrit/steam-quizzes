@@ -243,43 +243,142 @@ except Exception as e:
     # Fallback to components.v1.html for older Streamlit versions
     st.components.v1.html(quiz_html, height=800, scrolling=True)
 
-# Hidden input to receive data from JavaScript via postMessage
-quiz_result = st.text_input(
-    "",
-    key="quiz_completed_data",
-    label_visibility="collapsed"
-)
+# JavaScript listener component to receive postMessage from quiz iframe
+# This component returns quiz completion data to Python using Streamlit's component API
+import json
 
-# Process the result when received
-if quiz_result:
+# Initialize quiz tracking
+if 'quiz_last_processed' not in st.session_state:
+    st.session_state.quiz_last_processed = {}
+
+# Create the listener component - Streamlit auto-injects the Streamlit JavaScript API
+# The component listens for postMessage from the quiz iframe and returns data to Python
+quiz_listener_html = f"""
+<script>
+(function() {{
+    const QUIZ_ID = '{quiz_id}';
+    const USER_ID = {st.session_state.user_id};
+    let valueReturned = false;
+
+    // Function to return value to Streamlit
+    function returnQuizData(data) {{
+        if (valueReturned) return;  // Only return once per page load
+        valueReturned = true;
+
+        console.log('Returning quiz data to Streamlit:', data);
+
+        // Use Streamlit's component API to return data to Python
+        if (typeof Streamlit !== 'undefined' && Streamlit.setComponentValue) {{
+            Streamlit.setComponentValue(data);
+        }} else {{
+            console.error('Streamlit API not available');
+        }}
+    }}
+
+    // Listen for postMessage from the quiz iframe
+    window.addEventListener('message', function(event) {{
+        // Verify the message is from our quiz
+        if (event.data && event.data.type === 'quiz_completed' &&
+            event.data.quizId === QUIZ_ID) {{
+            console.log('Received quiz completion via postMessage:', event.data);
+
+            // Add timestamp for unique identification
+            event.data.timestamp = Date.now();
+
+            // Store in localStorage as backup
+            try {{
+                localStorage.setItem('quiz_' + QUIZ_ID + '_result', JSON.stringify(event.data));
+            }} catch (e) {{
+                console.error('Error storing to localStorage:', e);
+            }}
+
+            // Return data to Python
+            returnQuizData(event.data);
+        }}
+    }});
+
+    // Check for pending data in localStorage (from previous page loads or iframe)
+    const pendingKey = 'quiz_' + QUIZ_ID + '_result';
+    const pendingData = localStorage.getItem(pendingKey);
+
+    if (pendingData) {{
+        try {{
+            const data = JSON.parse(pendingData);
+            const age = Date.now() - (data.timestamp || 0);
+
+            // Only return data if less than 2 minutes old
+            if (age < 120000) {{
+                console.log('Found pending quiz data in localStorage:', data);
+                returnQuizData(data);
+            }} else {{
+                // Clear old data
+                localStorage.removeItem(pendingKey);
+            }}
+        }} catch (e) {{
+            console.error('Error parsing pending data:', e);
+            localStorage.removeItem(pendingKey);
+        }}
+    }}
+
+    // Notify Streamlit that component is ready
+    if (typeof Streamlit !== 'undefined' && Streamlit.setFrameHeight) {{
+        Streamlit.setFrameHeight(0);
+    }}
+}})();
+</script>
+"""
+
+quiz_listener = st.components.v1.html(quiz_listener_html, height=0, scrolling=False)
+
+# Process quiz completion data returned from the listener component
+if quiz_listener is not None and quiz_listener:
     try:
-        import json
-        data = json.loads(quiz_result)
+        # quiz_listener should be a dict with quiz completion data
+        if isinstance(quiz_listener, dict):
+            data = quiz_listener
 
-        if data.get('quiz_id') == quiz_id:
-            record_quiz_attempt(
-                data['user_id'],
-                data['quiz_id'],
-                data['score'],
-                data['total'],
-                data.get('time_spent', 0)
-            )
+            if data.get('type') == 'quiz_completed' and data.get('quizId') == quiz_id:
+                # Create unique attempt key to prevent duplicate processing
+                attempt_key = f"{quiz_id}_{data.get('timestamp', '')}"
 
-            percentage = round(data['score'] / data['total'] * 100)
+                if not st.session_state.quiz_last_processed.get(attempt_key):
+                    # Record the quiz attempt
+                    record_quiz_attempt(
+                        st.session_state.user_id,
+                        data['quizId'],
+                        data['score'],
+                        data['total'],
+                        data.get('timeSpent', 0)
+                    )
 
-            st.success(f"""
-                🎉 **Quiz Completed!**
-                - Score: {data['score']}/{data['total']} ({percentage}%)
-                - Time: {data.get('time_spent', 0)} seconds
+                    percentage = round(data['score'] / data['total'] * 100)
 
-                Your result has been saved!
-            """)
-            st.balloons()
+                    st.success(f"""
+                        🎉 **Quiz Completed!**
+                        - Score: {data['score']}/{data['total']} ({percentage}%)
+                        - Time: {data.get('timeSpent', 0)} seconds
 
-            # Clear the input to prevent duplicate saves
-            st.session_state.quiz_completed_data = ""
+                        Your result has been saved!
+                    """)
+                    st.balloons()
+
+                    # Mark as processed
+                    st.session_state.quiz_last_processed[attempt_key] = True
+
+                    # Clear localStorage
+                    clear_script = f"""
+                    <script>
+                    localStorage.removeItem('quiz_{quiz_id}_result');
+                    </script>
+                    """
+                    st.components.v1.html(clear_script, height=0)
+
+                    # Rerun to show success message
+                    st.rerun()
     except Exception as e:
-        st.error(f"Error saving quiz result: {e}")
+        st.error(f"Error processing quiz result: {e}")
+        import traceback
+        st.error(traceback.format_exc())
 
 # Instructions
 st.markdown("""
