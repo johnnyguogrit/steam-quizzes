@@ -24,6 +24,9 @@ def init_auth():
         st.session_state.full_name = None
     if "class_id" not in st.session_state:
         st.session_state.class_id = None
+    # Track which login view to show
+    if "login_view" not in st.session_state:
+        st.session_state.login_view = "selection"  # selection, teacher, student
 
 
 def login(username: str, password: str) -> bool:
@@ -36,6 +39,8 @@ def login(username: str, password: str) -> bool:
         st.session_state.user_name = user["username"]
         st.session_state.full_name = user.get("full_name", "")
         st.session_state.class_id = user.get("class_id", "")
+        # Reset login view after successful login
+        st.session_state.login_view = "selection"
         return True
     return False
 
@@ -48,6 +53,7 @@ def logout():
     st.session_state.user_name = None
     st.session_state.full_name = None
     st.session_state.class_id = None
+    st.session_state.login_view = "selection"
     st.rerun()
 
 
@@ -99,6 +105,11 @@ def require_teacher():
 
 def show_student_login_page():
     """Display the child-friendly student login page with 3 steps."""
+    st.set_page_config(page_title="Student Login", page_icon="👨‍🎓")
+
+    # Set login view to student
+    st.session_state.login_view = "student"
+
     # Initialize session state for login steps
     if "login_step" not in st.session_state:
         st.session_state.login_step = 1
@@ -148,7 +159,7 @@ def show_student_login_page():
 
             col_a, col_b, col_c = st.columns([1, 2, 1])
             with col_b:
-                if st.button("Next 下一步", use_container_width=True, type="primary"):
+                if st.button("Next 下一步", use_container_width=True, type="primary", key="student_next_1"):
                     if class_code and len(class_code) == 8:
                         if get_class_by_code(class_code.upper()):
                             st.session_state.login_class_code = class_code.upper()
@@ -173,18 +184,18 @@ def show_student_login_page():
 
                 col_a, col_b, col_c = st.columns([1, 2, 1])
                 with col_a:
-                    if st.button("Back 返回", use_container_width=True):
+                    if st.button("Back 返回", use_container_width=True, key="student_back_2"):
                         st.session_state.login_step = 1
                         st.rerun()
                 with col_c:
-                    if st.button("Next 下一步", use_container_width=True, type="primary"):
+                    if st.button("Next 下一步", use_container_width=True, type="primary", key="student_next_2"):
                         if selected_name:
                             st.session_state.login_username = student_names[selected_name]["username"]
                             st.session_state.login_step = 3
                             st.rerun()
             else:
                 st.error("No students found in this class. 这个班级没有找到学生。")
-                if st.button("Back 返回", use_container_width=True):
+                if st.button("Back 返回", use_container_width=True, key="student_back_2_empty"):
                     st.session_state.login_step = 1
                     st.rerun()
 
@@ -213,11 +224,12 @@ def show_student_login_page():
             st.markdown("---")
             col_a, col_b, col_c = st.columns([1, 2, 1])
             with col_a:
-                if st.button("Back 返回", use_container_width=True):
+                if st.button("Back 返回", use_container_width=True, key="student_back_3"):
                     st.session_state.login_step = 2
                     st.rerun()
             with col_c:
-                if st.button("Login 登录", use_container_width=True, type="primary", disabled=st.session_state.login_animal is None):
+                if st.button("Login 登录", use_container_width=True, type="primary",
+                           disabled=st.session_state.login_animal is None, key="student_login_btn"):
                     user = authenticate_student(
                         st.session_state.login_class_code,
                         st.session_state.login_username,
@@ -239,18 +251,105 @@ def show_student_login_page():
                     else:
                         st.error("Wrong password. Password doesn't match. 密码错误，请重试。")
 
-        # Teacher login link at bottom
+        # Back to selection button
         st.markdown("---")
-        if st.button("Teacher Login 教师登录", use_container_width=True):
+        if st.button("← Back to Login Selection", use_container_width=True, key="student_to_selection"):
             for key in ["login_step", "login_class_code", "login_username", "login_animal"]:
                 if key in st.session_state:
                     del st.session_state[key]
-            st.switch_page("app.py")
+            st.session_state.login_view = "selection"
+            st.rerun()
+
+
+def show_teacher_login_page():
+    """Display the teacher login page."""
+    st.set_page_config(page_title="Teacher Login", page_icon="👨‍🏫")
+
+    # Set login view to teacher
+    st.session_state.login_view = "teacher"
+
+    # Custom CSS for login page
+    st.markdown("""
+        <style>
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .login-title {
+            text-align: center;
+            color: #FF6B9D;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .login-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown('<h1 class="login-title">👨‍🏫 Teacher Login</h1>', unsafe_allow_html=True)
+        st.markdown('<p class="login-subtitle">Enter your credentials to continue</p>', unsafe_allow_html=True)
+
+        tab1, tab2 = st.tabs(["Login", "First Time Setup"])
+
+        with tab1:
+            username = st.text_input("Username", key="teacher_username")
+            password = st.text_input("Password", type="password", key="teacher_password")
+
+            if st.button("Login", use_container_width=True, type="primary", key="teacher_login_btn"):
+                if username and password:
+                    if login(username, password):
+                        st.success(f"Welcome back, {st.session_state.full_name or username}! 🎉")
+                        st.rerun()
+                    else:
+                        st.error("Invalid username or password. Please try again.")
+                else:
+                    st.warning("Please enter both username and password.")
+
+        with tab2:
+            st.info("👋 First time here? Please contact your teacher to create an account.")
+            st.info("🔑 Teachers: Use the 'First Time Setup' tab to create your admin account.")
+
+            admin_username = st.text_input("Admin Username", key="admin_username")
+            admin_password = st.text_input("Admin Password", type="password", key="admin_password")
+            admin_name = st.text_input("Full Name", key="admin_name")
+
+            if st.button("Create Admin Account", use_container_width=True, key="create_admin_btn"):
+                if admin_username and admin_password and admin_name:
+                    if create_user(admin_username, admin_password, "teacher", admin_name):
+                        st.success("Admin account created! You can now log in.")
+                    else:
+                        st.error("Username already exists. Please choose another.")
+                else:
+                    st.warning("Please fill in all fields.")
+
+        st.markdown("---")
+        if st.button("← Back to Login Selection", use_container_width=True, key="teacher_to_selection"):
+            st.session_state.login_view = "selection"
+            st.rerun()
 
 
 def show_login_page():
     """Display login type selection (teacher vs student)."""
     st.set_page_config(page_title="STEAM Quiz Login", page_icon="🎓")
+
+    # If login_view is set to a specific type, show that page
+    if st.session_state.get("login_view") == "teacher":
+        show_teacher_login_page()
+        return
+    elif st.session_state.get("login_view") == "student":
+        show_student_login_page()
+        return
+
+    # Reset to selection if neither
+    st.session_state.login_view = "selection"
 
     # Custom CSS for login page
     st.markdown("""
@@ -297,7 +396,8 @@ def show_login_page():
                 </div>
             """, unsafe_allow_html=True)
             if st.button("Student Login\n学生登录", use_container_width=True, type="primary", key="goto_student_login"):
-                show_student_login_page()
+                st.session_state.login_view = "student"
+                st.rerun()
 
         with col2:
             st.markdown("""
@@ -307,51 +407,14 @@ def show_login_page():
                 </div>
             """, unsafe_allow_html=True)
             if st.button("Teacher Login\n教师登录", use_container_width=True, key="goto_teacher_login"):
-                show_teacher_login_form_inline()
+                st.session_state.login_view = "teacher"
+                st.rerun()
 
         st.markdown("""
             <div style="text-align: center; margin-top: 30px; color: #999;">
                 <p>🌈 Spring 2026 STEAM Program</p>
             </div>
         """, unsafe_allow_html=True)
-
-
-def show_teacher_login_form_inline():
-    """Show teacher login form inline."""
-    st.markdown("---")
-
-    tab1, tab2 = st.tabs(["Login 登录", "First Time Setup 首次设置"])
-
-    with tab1:
-        username = st.text_input("Username", key="login_username")
-        password = st.text_input("Password", type="password", key="login_password")
-
-        if st.button("Login", use_container_width=True, type="primary"):
-            if username and password:
-                if login(username, password):
-                    st.success(f"Welcome back, {st.session_state.full_name or username}! 🎉")
-                    st.rerun()
-                else:
-                    st.error("Invalid username or password. Please try again.")
-            else:
-                st.warning("Please enter both username and password.")
-
-    with tab2:
-        st.info("👋 First time here? Create your admin account.")
-        st.info("🔑 首次使用？请创建管理员账户。")
-
-        admin_username = st.text_input("Admin Username", key="admin_username")
-        admin_password = st.text_input("Admin Password", type="password", key="admin_password")
-        admin_name = st.text_input("Full Name", key="admin_name")
-
-        if st.button("Create Admin Account", use_container_width=True):
-            if admin_username and admin_password and admin_name:
-                if create_user(admin_username, admin_password, "teacher", admin_name):
-                    st.success("Admin account created! You can now log in.")
-                else:
-                    st.error("Username already exists. Please choose another.")
-            else:
-                st.warning("Please fill in all fields.")
 
 
 def logout_button():
