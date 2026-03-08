@@ -5,7 +5,7 @@ Displays the selected quiz and handles score submission.
 
 import streamlit as st
 import os
-import time
+import json
 from auth import require_auth, logout_button
 from config import get_quiz_by_id
 from database import record_quiz_attempt, get_quiz_attempts_by_quiz
@@ -105,7 +105,7 @@ if os.path.exists(js_path):
     with open(js_path, 'r', encoding='utf-8') as f:
         quiz_js = f.read()
 
-# Inject score reporting - auto-save to localStorage and notify parent
+# Inject score reporting - auto-save to localStorage and trigger save
 injected_js = f"""
 <script>
 // Streamlit Quiz Integration
@@ -115,6 +115,7 @@ injected_js = f"""
     window.startTime = Date.now();
     window.quizCompleted = false;
     window.autoSaveEnabled = {str(is_first_attempt).lower()};  // Only auto-save on first attempt
+    window.resultSaved = false;
 
     // Clear any old results when loading new quiz
     localStorage.removeItem('steam_quiz_result');
@@ -158,10 +159,13 @@ injected_js = f"""
 
         try {{
             localStorage.setItem('steam_quiz_result', JSON.stringify(result));
+            localStorage.setItem('steam_quiz_result_timestamp', Date.now().toString());
             console.log('Result stored to localStorage:', result);
 
-            // Trigger a custom event for the auto-save poller
-            window.dispatchEvent(new CustomEvent('quizCompleted', {{ detail: result }}));
+            // Trigger page scroll to show results
+            if (resultsDiv) {{
+                resultsDiv.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+            }}
         }} catch (e) {{
             console.error('Error storing quiz result:', e);
         }}
@@ -271,27 +275,30 @@ except Exception as e:
 # Auto-save polling section - runs continuously to detect completed quizzes
 st.markdown("---")
 
-# Auto-save indicator
+# Show status message
 if is_first_attempt:
     st.info("🔄 **Auto-save enabled**: Your first attempt score will be automatically saved when you complete the quiz.")
+    st.caption("💡 After completing the quiz, wait a moment and your score will appear below automatically.")
 else:
     st.info("📝 **Practice mode**: You've already taken this quiz. This attempt won't be recorded.")
 
-# Auto-save polling using st.js()
+# Auto-save polling - try multiple methods
 if is_first_attempt:
-    # Placeholder for auto-save status
+    # Initialize session state for tracking
     if 'auto_save_status' not in st.session_state:
         st.session_state.auto_save_status = {}
 
-    # Check for quiz completion using st.js()
+    # Method 1: Try st.js() (Streamlit 1.33+)
     try:
         result = st.js("""
             const resultStr = localStorage.getItem('steam_quiz_result');
-            if (resultStr) {
+            const timestampStr = localStorage.getItem('steam_quiz_result_timestamp');
+            if (resultStr && timestampStr) {
                 const result = JSON.parse(resultStr);
-                const age = Date.now() - (result.timestamp || 0);
-                if (age < 60000) {  // Valid for 1 minute
+                const age = Date.now() - parseInt(timestampStr);
+                if (age < 300000) {  // Valid for 5 minutes
                     localStorage.removeItem('steam_quiz_result');
+                    localStorage.removeItem('steam_quiz_result_timestamp');
                     return result;
                 }
             }
@@ -299,11 +306,9 @@ if is_first_attempt:
         """)
 
         if result:
-            # Create unique attempt key to prevent duplicate processing
             attempt_key = f"{quiz_id}_{result.get('timestamp', '')}"
 
             if not st.session_state.auto_save_status.get(attempt_key):
-                # Record the quiz attempt
                 record_quiz_attempt(
                     st.session_state.user_id,
                     result['quizId'],
@@ -323,12 +328,87 @@ if is_first_attempt:
                 """)
                 st.balloons()
 
-                # Mark as processed
                 st.session_state.auto_save_status[attempt_key] = True
 
-    except AttributeError:
-        # st.js() not available - show info for manual check
-        st.info("💡 Complete the quiz and your result will be visible in 'My Progress'.")
+    except (AttributeError, Exception):
+        # Method 2: Fallback using st.components.v1.html with auto-executing script
+        st.caption("⏳ Waiting for quiz completion...")
+
+        # Create an auto-checking component that runs when quiz completes
+        check_component = st.components.v1.html(
+            f"""
+            <html>
+            <body>
+            <script>
+            (function() {{
+                const resultStr = localStorage.getItem('steam_quiz_result');
+                const timestampStr = localStorage.getItem('steam_quiz_result_timestamp');
+
+                if (resultStr && timestampStr) {{
+                    try {{
+                        const result = JSON.parse(resultStr);
+                        const age = Date.now() - parseInt(timestampStr);
+
+                        // Only process if result is for this quiz and less than 5 minutes old
+                        if (result.quizId === '{quiz_id}' && age < 300000) {{
+                            // Set document.body to return the result
+                            document.body.innerHTML = resultStr;
+                            localStorage.removeItem('steam_quiz_result');
+                            localStorage.removeItem('steam_quiz_result_timestamp');
+                        }} else {{
+                            document.body.innerHTML = 'waiting';
+                        }}
+                    }} catch (e) {{
+                        document.body.innerHTML = 'error: ' + e.message;
+                    }}
+                }} else {{
+                    document.body.innerHTML = 'waiting';
+                }}
+            }})();
+            </script>
+            </body>
+            </html>
+            """,
+            height=0
+        )
+
+        # Process the result from the component
+        if check_component and check_component != 'waiting':
+            try:
+                if isinstance(check_component, str):
+                    data = json.loads(check_component)
+                elif isinstance(check_component, dict):
+                    data = check_component
+                else:
+                    data = None
+
+                if data and data.get('type') == 'quiz_completed':
+                    attempt_key = f"{quiz_id}_{data.get('timestamp', '')}"
+
+                    if not st.session_state.auto_save_status.get(attempt_key):
+                        record_quiz_attempt(
+                            st.session_state.user_id,
+                            data['quizId'],
+                            data['score'],
+                            data['total'],
+                            data.get('timeSpent', 0)
+                        )
+
+                        percentage = round(data['score'] / data['total'] * 100)
+
+                        st.success(f"""
+                            🎉 **First Attempt Saved!**
+                            - Score: {data['score']}/{data['total']} ({percentage}%)
+                            - Time: {data.get('timeSpent', 0)} seconds
+
+                            Your result has been automatically saved!
+                        """)
+                        st.balloons()
+
+                        st.session_state.auto_save_status[attempt_key] = True
+
+            except Exception as e:
+                pass  # Silently handle, will retry on next rerun
 
 # Instructions
 st.markdown("""
