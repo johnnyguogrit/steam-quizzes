@@ -100,7 +100,7 @@ if os.path.exists(css_path):
 # Get the JS file path
 js_path = os.path.join(os.path.dirname(quiz_path), 'script.js')
 quiz_js = ""
-if os_path.exists(js_path):
+if os.path.exists(js_path):
     with open(js_path, 'r', encoding='utf-8') as f:
         quiz_js = f.read()
 
