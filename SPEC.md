@@ -3,7 +3,7 @@
 ## Project Overview
 
 **Project Name**: STEAM Quiz Platform
-**Version**: 1.6.4
+**Version**: 1.6.5
 **Repository**: https://github.com/johnnyguogrit/steam-quizzes
 **Deployment**: https://steam-quizzes.streamlit.app
 **Status**: Production ✅
@@ -381,6 +381,7 @@ Students use a child-friendly 3-step login process with class codes:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v1.6.5 | 2026-03-08 | Auto-save quiz results, first attempt only - No manual button needed, teachers see only first attempt scores
 | v1.6.4 | 2026-03-08 | Use st.js() for proper JavaScript-Python communication
 | v1.6.3 | 2026-03-08 | Fix localStorage result retrieval - Use document.body.innerHTML for st.components.v1.html return value
 | v1.6.2 | 2026-03-08 | Fix script load order - Load quiz JS before injected JS so checkAnswers override works correctly
