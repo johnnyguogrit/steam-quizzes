@@ -105,9 +105,11 @@ if os_path.exists(js_path):
         quiz_js = f.read()
 
 # Insert JavaScript to show score when quiz completes
-# Uses postMessage to communicate with parent page
+# Uses window.name for cross-origin communication (works with srcdoc iframes)
 injected_js = f"""
 <script>
+console.log('[Quiz] v1.8.1 integration script loaded');
+
 // Streamlit Quiz Integration
 (function() {{
     window.quizId = "{quiz_id}";
@@ -123,7 +125,7 @@ injected_js = f"""
         const timeSpent = Math.round((Date.now() - window.startTime) / 1000);
         const percentage = Math.round((score / total) * 100);
 
-        // Store result in multiple locations for compatibility
+        // Create result object
         const resultData = {{
             quizId: "{quiz_id}",
             userId: {st.session_state.user_id},
@@ -133,31 +135,50 @@ injected_js = f"""
             timestamp: Date.now()
         }};
 
-        // 1. Store in window variables
+        console.log('[Quiz] v1.8.1 - ReportScore called with:', {{ score, total, timeSpent }});
+
+        // METHOD 1: Store in window variables (for direct iframe access)
         window.steamQuizResult = resultData;
         window.quizResultData = resultData;
+        console.log('[Quiz] v1.8.1 - Stored in window variables');
 
-        // 2. Store in localStorage (same-origin)
+        // METHOD 2: Use window.name (cross-origin safe)
         try {{
-            localStorage.setItem('steam_quiz_result', JSON.stringify(resultData));
-            localStorage.setItem('steam_quiz_timestamp', Date.now().toString());
-            console.log('[Quiz] Result stored to localStorage');
+            const nameData = JSON.stringify({{ type: 'steam_quiz', data: resultData, ts: Date.now() }});
+            window.name = nameData;
+            console.log('[Quiz] v1.8.1 - Stored in window.name');
         }} catch(e) {{
-            console.log('[Quiz] localStorage not available:', e);
+            console.log('[Quiz] v1.8.1 - window.name failed:', e);
         }}
 
-        // 3. Send postMessage to parent
+        // METHOD 3: Send postMessage to parent
         try {{
             window.parent.postMessage({{
                 type: 'steam_quiz_completed',
                 data: resultData
             }}, '*');
-            console.log('[Quiz] postMessage sent to parent');
+            console.log('[Quiz] v1.8.1 - postMessage sent');
         }} catch(e) {{
-            console.log('[Quiz] postMessage failed:', e);
+            console.log('[Quiz] v1.8.1 - postMessage failed:', e);
         }}
 
-        console.log('[Quiz] Quiz completed:', {{ score, total, timeSpent }});
+        // METHOD 4: Store in parent's localStorage via postMessage response
+        // We'll create a hidden element with the data
+        try {{
+            const hiddenDiv = document.createElement('div');
+            hiddenDiv.id = 'steam-quiz-result';
+            hiddenDiv.setAttribute('data-quiz-id', resultData.quizId);
+            hiddenDiv.setAttribute('data-user-id', resultData.userId.toString());
+            hiddenDiv.setAttribute('data-score', resultData.score.toString());
+            hiddenDiv.setAttribute('data-total', resultData.total.toString());
+            hiddenDiv.setAttribute('data-time-spent', resultData.timeSpent.toString());
+            hiddenDiv.setAttribute('data-timestamp', resultData.timestamp.toString());
+            hiddenDiv.style.display = 'none';
+            document.body.appendChild(hiddenDiv);
+            console.log('[Quiz] v1.8.1 - Hidden element created');
+        }} catch(e) {{
+            console.log('[Quiz] v1.8.1 - Hidden element failed:', e);
+        }}
 
         // Update the results display
         const resultsDiv = document.getElementById('streamlit-quiz-results');
@@ -208,11 +229,14 @@ injected_js = f"""
                     }}
                 }}
 
+                console.log('[Quiz] v1.8.1 - checkAnswers extracted score:', {{ score, total }});
                 window.reportScore(score, total);
             }}, 300);
 
             return result;
         }};
+    }} else {{
+        console.log('[Quiz] v1.8.1 - checkAnswers function not found, using observer only');
     }}
 
     // Watch for results div to appear
@@ -235,6 +259,7 @@ injected_js = f"""
                             }}
                         }}
 
+                        console.log('[Quiz] v1.8.1 - Observer extracted score:', {{ score, total }});
                         window.reportScore(score, total);
                     }}, 200);
                 }}
@@ -243,6 +268,7 @@ injected_js = f"""
     }});
 
     observer.observe(document.body, {{ childList: true, subtree: true }});
+    console.log('[Quiz] v1.8.1 - Observer started');
 }})();
 </script>
 
@@ -273,127 +299,101 @@ except Exception as e:
     st.components.v1.html(quiz_html, height=800, scrolling=True)
 
 # ============================================================================
-# AUTO-SCORE DETECTION WITH st.javascript() - READ FROM LOCALSTORAGE
+# AUTO-SCORE DETECTION - MULTI-METHOD APPROACH
 # ============================================================================
 
 st.markdown("---")
-
-# Set up postMessage listener BEFORE checking for result
-if hasattr(st, 'javascript'):
-    # This sets up a listener for postMessage from the iframe
-    setup_listener_js = """
-    (function() {
-        if (window.steamQuizMessageListener) {
-            return 'Listener already exists';
-        }
-
-        window.steamQuizMessageListener = function(event) {
-            console.log('[Parent] Received message:', event);
-            if (event.data && event.data.type === 'steam_quiz_completed') {
-                console.log('[Parent] Quiz completion received:', event.data.data);
-                // Store in localStorage for Python to read
-                localStorage.setItem('steam_quiz_from_postMessage', JSON.stringify(event.data.data));
-                localStorage.setItem('steam_quiz_from_postMessage_time', Date.now().toString());
-            }
-        };
-
-        window.addEventListener('message', window.steamQuizMessageListener);
-        console.log('[Parent] postMessage listener registered');
-        return 'Listener registered';
-    })();
-    """
-    try:
-        st.javascript(setup_listener_js)
-    except:
-        pass
 
 # Status display area
 status_placeholder = st.empty()
 
 # Check for quiz result using st.javascript()
-# Try multiple sources: localStorage, postMessage, iframe contentWindow
+# Try multiple methods: window.name, iframe contentWindow, postMessage
 quiz_saved = False
 if hasattr(st, 'javascript'):
     check_js = f"""
     (function() {{
+        console.log('[st.js] v1.8.1 - Checking for quiz result...');
         const QUIZ_ID = "{quiz_id}";
         const USER_ID = {st.session_state.user_id};
         const now = Date.now();
-        const FIVE_MINUTES = 5 * 60 * 1000;
+        const ONE_MINUTE = 60 * 1000;
 
-        // Method 1: Check localStorage (primary method - same-origin)
+        // METHOD 1: Check window.name (cross-origin safe)
         try {{
-            const stored = localStorage.getItem('steam_quiz_result');
-            const timestamp = localStorage.getItem('steam_quiz_timestamp');
-
-            if (stored && timestamp) {{
-                const age = now - parseInt(timestamp);
-                if (age < FIVE_MINUTES) {{
-                    const result = JSON.parse(stored);
-                    if (result.quizId === QUIZ_ID && result.userId === USER_ID) {{
-                        console.log('[st.js] Found result in localStorage:', result);
-
-                        // Clear to prevent duplicate saves
-                        localStorage.removeItem('steam_quiz_result');
-                        localStorage.removeItem('steam_quiz_timestamp');
-                        localStorage.removeItem('steam_quiz_from_postMessage');
-                        localStorage.removeItem('steam_quiz_from_postMessage_time');
-
-                        return JSON.stringify(result);
+            const nameStr = window.name;
+            if (nameStr && nameStr.startsWith('{{')) {{
+                const nameData = JSON.parse(nameStr);
+                if (nameData.type === 'steam_quiz' && nameData.data) {{
+                    const age = now - (nameData.ts || 0);
+                    if (age < ONE_MINUTE && nameData.data.quizId === QUIZ_ID && nameData.data.userId === USER_ID) {{
+                        console.log('[st.js] v1.8.1 - Found result in window.name:', nameData.data);
+                        window.name = '';  // Clear to prevent duplicate saves
+                        return JSON.stringify(nameData.data);
                     }}
                 }}
             }}
         }} catch(e) {{
-            console.log('[st.js] localStorage check failed:', e);
+            console.log('[st.js] v1.8.1 - window.name check failed:', e);
         }}
 
-        // Method 2: Check postMessage result
+        // METHOD 2: Try direct iframe access
         try {{
-            const postMessageResult = localStorage.getItem('steam_quiz_from_postMessage');
-            const postMessageTime = localStorage.getItem('steam_quiz_from_postMessage_time');
+            const iframes = document.querySelectorAll('iframe');
+            console.log('[st.js] v1.8.1 - Found', iframes.length, 'iframes');
 
-            if (postMessageResult && postMessageTime) {{
-                const age = now - parseInt(postMessageTime);
-                if (age < FIVE_MINUTES) {{
-                    const result = JSON.parse(postMessageResult);
-                    if (result.quizId === QUIZ_ID && result.userId === USER_ID) {{
-                        console.log('[st.js] Found result from postMessage:', result);
+            for (let i = 0; i < iframes.length; i++) {{
+                const iframe = iframes[i];
+                try {{
+                    const iframeWindow = iframe.contentWindow;
+                    const result = iframeWindow.steamQuizResult || iframeWindow.quizResultData;
 
-                        localStorage.removeItem('steam_quiz_from_postMessage');
-                        localStorage.removeItem('steam_quiz_from_postMessage_time');
-                        localStorage.removeItem('steam_quiz_result');
-                        localStorage.removeItem('steam_quiz_timestamp');
-
+                    if (result && result.quizId === QUIZ_ID && result.userId === USER_ID) {{
+                        console.log('[st.js] v1.8.1 - Found result in iframe[' + i + ']:', result);
+                        iframeWindow.steamQuizResult = null;
+                        iframeWindow.quizResultData = null;
+                        iframeWindow.name = '';
                         return JSON.stringify(result);
                     }}
+                }} catch(e) {{
+                    // Cross-origin blocked, try next iframe
+                    continue;
                 }}
             }}
         }} catch(e) {{
-            console.log('[st.js] postMessage check failed:', e);
+            console.log('[st.js] v1.8.1 - iframe access failed:', e);
         }}
 
-        // Method 3: Try direct iframe access (may fail due to cross-origin)
+        // METHOD 3: Check for hidden element with data attributes
         try {{
             const iframes = document.querySelectorAll('iframe');
             for (let iframe of iframes) {{
                 try {{
-                    const iframeWindow = iframe.contentWindow;
-                    const result = iframeWindow.steamQuizResult || iframeWindow.quizResultData;
-                    if (result) {{
-                        console.log('[st.js] Found result in iframe:', result);
-                        iframeWindow.steamQuizResult = null;
-                        iframeWindow.quizResultData = null;
-                        return JSON.stringify(result);
+                    const doc = iframe.contentDocument || iframe.contentWindow.document;
+                    const hiddenDiv = doc.getElementById('steam-quiz-result');
+                    if (hiddenDiv) {{
+                        const quizId = hiddenDiv.getAttribute('data-quiz-id');
+                        const userId = parseInt(hiddenDiv.getAttribute('data-user-id'));
+                        const score = parseInt(hiddenDiv.getAttribute('data-score'));
+                        const total = parseInt(hiddenDiv.getAttribute('data-total'));
+                        const timeSpent = parseInt(hiddenDiv.getAttribute('data-time-spent'));
+
+                        if (quizId === QUIZ_ID && userId === USER_ID) {{
+                            console.log('[st.js] v1.8.1 - Found result in hidden element:', {{ quizId, userId, score, total }});
+                            // Clean up
+                            hiddenDiv.remove();
+                            return JSON.stringify({{ quizId, userId, score, total, timeSpent }});
+                        }}
                     }}
                 }} catch(e) {{
                     continue;
                 }}
             }}
         }} catch(e) {{
-            console.log('[st.js] iframe access failed:', e);
+            console.log('[st.js] v1.8.1 - hidden element check failed:', e);
         }}
 
-        console.log('[st.js] No quiz result found');
+        console.log('[st.js] v1.8.1 - No quiz result found (tried all methods)');
         return null;
     }})();
     """
