@@ -31,7 +31,7 @@ def seed_database():
         return
 
     # Create admin teacher
-    admin_password = "steam2026"  # Change this to your desired password
+    admin_password = "Perfect@2025"  # Admin password
     if create_user("SteamMaster", admin_password, "teacher", "Admin"):
         print("✓ Created admin user: SteamMaster")
 
